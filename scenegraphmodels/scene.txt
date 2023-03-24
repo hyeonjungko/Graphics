@@ -1,0 +1,147 @@
+instance box models/box.obj
+instance cylinder models/cylinder.obj
+
+# materials
+material mat-building
+ambient 0.768 0.407 0.407
+end-material
+
+material mat-building-2
+ambient 0.368 0. 785 0.345
+end-material
+
+material mat-base
+ambient 0.258 0.658 0.356
+end-material
+
+group main-root main-root
+
+# translate box-building-2
+translate translate-box-building-2 translate-box-building-2 -70 0 60
+add-child translate-box-building-2 main-root
+
+rotate rotate-box-building-2 rotate-box-building-2 30 0 1 0
+add-child rotate-box-building-2 translate-box-building-2
+
+# create box-building-2 with import
+import box-building-2 scenegraphmodels/building2.txt
+add-child box-building-2 rotate-box-building-2
+
+# translate box-building-1
+translate translate-box-building-1 translate-box-building-1 65 0 -30
+add-child translate-box-building-1 main-root
+
+rotate rotate-box-building-1 rotate-box-building-1 290 0 1 0
+add-child rotate-box-building-1 translate-box-building-1
+
+# create box-building-1 with import
+import box-building-1 scenegraphmodels/building1.txt
+add-child box-building-1 rotate-box-building-1
+
+group root-1 root-1
+add-child root-1 main-root
+
+# translate humanoid-2 & attach to root-1
+translate translate-humanoid-2 translate-humanoid-2 50 0 60
+add-child translate-humanoid-2 root-1
+
+# scale humanoid-2 & attach to translate
+scale scale-humanoid-2 scale-humanoid-2 0.5 0.5 0.5
+add-child scale-humanoid-2 translate-humanoid-2
+
+# rotate humanoid-2
+rotate rotate-humanoid-2 rotate-humanoid-2 15 0 1 0
+add-child rotate-humanoid-2 scale-humanoid-2
+
+# create humanoid-2 with import
+import humanoid-2 scenegraphmodels/humanoid-front-lat-spread.txt
+add-child humanoid-2 rotate-humanoid-2
+
+# translate humanoid-1 & attach to root-1
+translate translate-humanoid-1 translate-humanoid-1 0 0 60
+add-child translate-humanoid-1 root-1
+
+# scale humanoid-1 & attach to translate
+scale scale-humanoid-1 scale-humanoid-1 0.5 0.5 0.5
+add-child scale-humanoid-1 translate-humanoid-1
+
+# rotate humanoid-1
+rotate rotate-humanoid-1 rotate-humanoid-1 30 0 1 0
+add-child rotate-humanoid-1 scale-humanoid-1
+
+# create humanoid-1 with import
+import humanoid-1 scenegraphmodels/humanoid-front-double-biceps.txt
+add-child humanoid-1 rotate-humanoid-1
+
+# scale base
+scale scalebase scalebase 220 5 180
+add-child scalebase root-1
+
+# create base left node
+leaf base base instanceof box
+assign-material base mat-base
+add-child base scalebase
+
+# create group node building
+group building building
+add-child building root-1
+
+# translate main building
+translate translate-main-building translate-main-building -60 30 -30
+add-child translate-main-building building
+
+# scale main building
+scale scale-main-building scale-main-building 70 60 70
+add-child scale-main-building translate-main-building
+
+# create main building & attach to scale main building
+leaf main-building main-building instanceof box
+assign-material main-building mat-building
+add-child main-building scale-main-building
+
+# translate building-2
+translate translate-building-2 translate-building-2 -60 60 -27
+add-child translate-building-2 building
+
+# scale building-2
+scale scale-building-2 scale-building-2 30 30 30
+add-child scale-building-2 translate-building-2
+
+# create building-2 and attach to the main buidling
+leaf leaf-building-2 leaf-building-2 instanceof box
+assign-material leaf-building-2 mat-building-2
+add-child leaf-building-2 scale-building-2
+
+# translate turret-4
+translate translate-turret-4 translate-turret-2 -30 60 0
+add-child translate-turret-4 building
+
+# create turret-4 with import
+import turret-4 scenegraphmodels/turret.txt
+add-child turret-4 translate-turret-4
+
+# translate turret-3
+translate translate-turret-3 translate-turret-3 -90 60 -60
+add-child translate-turret-3 building
+
+# create turret-3 with import
+import turret-3 scenegraphmodels/turret.txt
+add-child turret-3 translate-turret-3
+
+# translate turret-2
+translate translate-turret-2 translate-turret-2 -30 60 -60
+add-child translate-turret-2 building
+
+# create turret-2 with import
+import turret-2 scenegraphmodels/turret.txt
+add-child turret-2 translate-turret-2
+
+# translate turret
+translate translate-turret-1 translate-turret-1 -90 60 0
+add-child translate-turret-1 building
+
+# create turret-1 with import
+import turret-1 scenegraphmodels/turret.txt
+add-child turret-1 translate-turret-1
+
+assign-root main-root

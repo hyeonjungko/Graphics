@@ -1,0 +1,36 @@
+instance cone models/cone.obj
+instance cylinder models/cylinder.obj
+
+# materials
+material mat-building
+ambient 0.19 0.286 0.47
+end-material
+
+material mat-roof
+ambient 0.98 0.729 0.012
+end-material
+
+
+
+group s-turret s-turret
+assign-root s-turret
+
+# scale turret
+scale scale-turret scale-turret 5 14 5
+add-child scale-turret s-turret
+
+group turret turret
+add-child turret scale-turret
+
+# create turret & attach to turret
+leaf turret-body turret-body instanceof cylinder
+assign-material turret-body mat-building
+add-child turret-body turret
+
+translate translate-turret-head translate-turret-head 0 1 0
+add-child translate-turret-head turret
+
+# create cone & attach to turret
+leaf turret-head turret-head instanceof cone
+assign-material turret-head mat-roof
+add-child turret-head translate-turret-head
