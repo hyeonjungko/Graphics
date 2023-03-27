@@ -3,6 +3,7 @@
 
 #include "IScenegraph.h"
 #include "Scenegraph.h"
+#include "Light.h"
 #include "GroupNode.h"
 #include "LeafNode.h"
 #include "TransformNode.h"
@@ -71,6 +72,14 @@ namespace sgraph
                 {
                     parseTranslate(inputWithOutComments);
                 }
+                else if (command == "light")
+                {
+                    parseLight(inputWithOutComments);
+                }
+                else if (command == "attach-light")
+                {
+                    parseAttachLight(inputWithOutComments);
+                }
                 else if (command == "copy")
                 {
                     parseCopy(inputWithOutComments);
@@ -115,7 +124,6 @@ namespace sgraph
         {
             string varname, name;
             input >> varname >> name;
-
             cout << "Read " << varname << " " << name << endl;
             SGNode *group = new GroupNode(name, NULL);
             nodes[varname] = group;
@@ -153,6 +161,98 @@ namespace sgraph
             input >> tx >> ty >> tz;
             SGNode *translateNode = new TranslateTransform(tx, ty, tz, name, NULL);
             nodes[varname] = translateNode;
+        }
+
+        virtual void parseLight(istream &input)
+        {
+            /*
+                color
+                position = glm::vec4(0, 0, 0, 1);
+                spotDirection = glm::vec4(0, 0, 0, 0);
+                spotCutoff = 0.0f;
+
+                example light xml:
+                    light light1
+                    position 0 0 0
+                    direction 0 0 1
+                    ambient 0.611 0.349 0.207
+                    diffuse 0.4 0.4 0.6
+                    specular 0 0 0.8
+                    spot-direction 0 0 0 0
+                    spot-angle 23.0
+                    end-light
+            */
+            util::Light light;
+            float r, g, b;
+            float x, y, z;
+            float angle;
+            string name;
+            input >> name;
+            printf("\nlight: %s\n", name.c_str());
+            string command;
+            input >> command;
+            while (command != "end-light")
+            {
+                if (command == "position")
+                {
+                    input >> x >> y >> z;
+                    printf("pos: %f, %f, %f\n", x, y, z);
+                    light.setPosition(x, y, z);
+                }
+                else if (command == "direction")
+                {
+                    input >> x >> y >> z;
+                    printf("dir: %f, %f, %f\n", x, y, z);
+                    light.setDirection(x, y, z);
+                }
+                else if (command == "ambient")
+                {
+                    input >> r >> g >> b;
+                    printf("ambient: %f, %f, %f\n", r, g, b);
+                    light.setAmbient(r, g, b);
+                }
+                else if (command == "diffuse")
+                {
+                    input >> r >> g >> b;
+                    printf("diffuse: %f, %f, %f\n", r, g, b);
+                    light.setDiffuse(r, g, b);
+                }
+                else if (command == "specular")
+                {
+                    input >> r >> g >> b;
+                    printf("specular: %f, %f, %f\n", r, g, b);
+                    // light.setSpecular(r, g, b);
+                }
+                else if (command == "spot-direction")
+                {
+                    input >> x >> y >> z;
+                    printf("spot-direction: %f, %f, %f\n", x, y, z);
+                    light.setSpotDirection(x, y, z);
+                }
+                else if (command == "spot-angle")
+                {
+                    input >> angle;
+                    printf("spot-angle: %f\n", angle);
+                    light.setSpotAngle(angle);
+                }
+                input >> command;
+            }
+            lights[name] = light;
+        }
+
+        virtual void parseAttachLight(istream &input) // TODO:
+        {
+            string lightname, nodename;
+
+            input >> lightname >> nodename;
+
+            SGNode *node = NULL;
+            util::Light *light = NULL;
+
+            if (nodes.find(nodename) != nodes.end() && (lights.find(lightname) != lights.end()))
+            {
+                node->attachLight(lights[lightname]);
+            }
         }
 
         virtual void parseRotate(istream &input)
@@ -301,6 +401,7 @@ namespace sgraph
     private:
         map<string, SGNode *> nodes;
         map<string, util::Material> materials;
+        map<string, util::Light> lights;
         map<string, util::PolygonMesh<VertexAttrib>> meshes;
         map<string, string> meshPaths;
         SGNode *root;

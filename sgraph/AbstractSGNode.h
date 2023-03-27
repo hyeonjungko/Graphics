@@ -11,10 +11,11 @@ namespace sgraph
 {
 
   /**
- * This abstract class implements the sgraph::SGNode interface. 
- * \author Amit Shesh
- */
-  class AbstractSGNode : public SGNode {
+   * This abstract class implements the sgraph::SGNode interface.
+   * \author Amit Shesh
+   */
+  class AbstractSGNode : public SGNode
+  {
     /**
      * The name given to this node
      */
@@ -28,9 +29,11 @@ namespace sgraph
      * A reference to the sgraph::IScenegraph object that this is part of
      */
     sgraph::IScenegraph *scenegraph;
+    vector<util::Light> lights;
 
   public:
-    AbstractSGNode(const string& name,sgraph::IScenegraph *graph) {
+    AbstractSGNode(const string &name, sgraph::IScenegraph *graph)
+    {
       this->parent = NULL;
       scenegraph = graph;
       setName(name);
@@ -42,7 +45,8 @@ namespace sgraph
      * \param name name of node to be searched
      * \return the node whose name this is, null otherwise
      */
-    SGNode *getNode(const string& name) {
+    SGNode *getNode(const string &name)
+    {
       if (this->name == name)
         return this;
 
@@ -54,7 +58,8 @@ namespace sgraph
      * \param parent the node that is to be the parent of this node
      */
 
-    void setParent(SGNode *parent) {
+    void setParent(SGNode *parent)
+    {
       this->parent = parent;
     }
 
@@ -63,16 +68,18 @@ namespace sgraph
      * to the scenegraph (in case the scene graph ever needs to directly access this node)
      * \param graph a reference to the scenegraph object of which this tree is a part
      */
-    void setScenegraph(sgraph::IScenegraph *graph) {
+    void setScenegraph(sgraph::IScenegraph *graph)
+    {
       this->scenegraph = graph;
-      graph->addNode(this->name,this);
+      graph->addNode(this->name, this);
     }
 
     /**
      * Sets the name of this node
      * \param name the name of this node
      */
-    void setName(const string& name) {
+    void setName(const string &name)
+    {
       this->name = name;
     }
 
@@ -80,8 +87,19 @@ namespace sgraph
      * Gets the name of this node
      * \return the name of this node
      */
-    string getName() { return name;}
+    string getName() { return name; }
+    /**
+     * Attaches the Light object to this node
+     */
+    void attachLight(util::Light light)
+    {
+      lights.push_back(light);
+    }
 
+    vector<util::Light> getLights()
+    {
+      return lights;
+    }
   };
 }
 #endif
