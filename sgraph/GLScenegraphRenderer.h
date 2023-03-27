@@ -1,6 +1,9 @@
 #ifndef _GLSCENEGRAPHRENDERER_H_
 #define _GLSCENEGRAPHRENDERER_H_
 
+#include "../ImageLoader.h"
+#include "../PPMImageLoader.h"
+#include "../TextureImage.h"
 #include "SGNodeVisitor.h"
 #include "GroupNode.h"
 #include "LeafNode.h"
@@ -62,9 +65,50 @@ namespace sgraph
          */
         void visitLeafNode(LeafNode *leafNode)
         {
-            // send modelview matrix to GPU
+
+            // load in the textures TODO: this is an intermediate step
+            ImageLoader *loader = new PPMImageLoader();
+            loader->load("textures/earthmap.ppm");
+            util::TextureImage *textureObject = new util::TextureImage(loader->getPixels(), loader->getWidth(), loader->getHeight(), "earthmap");
+
+            unsigned int textureId;
+            glGenTextures(1, &textureId);
+            glBindTexture(GL_TEXTURE_2D, textureId);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // if the s-coordinate goes outside (0,1), repeat it
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // if the t-coordinate goes outside (0,1), repeat it
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureObject->getWidth(), textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, textureObject->getImage());
+            glGenerateMipmap(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, textureId);
+            /**
+             * in vec4 vPosition;
+             * in vec4 vNormal;
+             * in vec4 vTexCoord;
+             *
+             * uniform mat4 projection;
+             * uniform mat4 modelview;
+             * uniform mat4 normalmatrix;
+             * uniform mat4 texturematrix;
+             */
             glUniformMatrix4fv(shaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview.top()));
-            glUniform4fv(shaderLocations.getLocation("vColor"), 1, glm::value_ptr(leafNode->getMaterial().getAmbient()));
+            glm::mat4 normalmatrix = glm::inverse(glm::transpose((modelview.top())));
+            glUniformMatrix4fv(shaderLocations.getLocation("normalmatrix"), 1, false, glm::value_ptr(normalmatrix));
+            glm::mat4 textureTransform = glm::mat4(1.0);
+            glUniformMatrix4fv(shaderLocations.getLocation("texturematrix"), 1, false, glm::value_ptr(textureTransform));
+
+            // enable texture mapping
+            glEnable(GL_TEXTURE_2D);
+            glActiveTexture(GL_TEXTURE0);
+            // tell the shader to look for GL_TEXTURE"0"
+            glUniform1i(shaderLocations.getLocation("image"), 0); // TODO: need functions to fetch texture images
+
+            glUniform3fv(shaderLocations.getLocation("material.ambient"), 1, glm::value_ptr(leafNode->getMaterial().getAmbient()));
+            glUniform3fv(shaderLocations.getLocation("material.diffuse"), 1, glm::value_ptr(leafNode->getMaterial().getDiffuse()));
+            glUniform3fv(shaderLocations.getLocation("material.specular"), 1, glm::value_ptr(leafNode->getMaterial().getSpecular()));
+            glUniform1f(shaderLocations.getLocation("material.shininess"), leafNode->getMaterial().getShininess());
+
             objects[leafNode->getInstanceOf()]->draw();
         }
 

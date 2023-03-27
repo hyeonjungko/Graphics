@@ -64,26 +64,14 @@ void View::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1);
 
-    // create the shader program
-    program.createProgram(string("shaders/default.vert"), string("shaders/default.frag"));
-    // program.createProgram(string("shaders/phong-multiple.vert"), string("shaders/phong-multiple.frag"));
+    // program.createProgram(string("shaders/default.vert"), string("shaders/default.frag"));
+    program.createProgram(string("shaders/phong-multiple.vert"), string("shaders/phong-multiple.frag"));
     //  assuming it got created, get all the shader variables that it uses
     //  so we can initialize them at some point
     //  enable the shader program
     program.enable();
     shaderLocations = program.getAllShaderVariables();
 
-    /* In the mesh, we have some attributes for each vertex. In the shader
-     * we have variables for each vertex attribute. We have to provide a mapping
-     * between attribute name in the mesh and corresponding shader variable
-     name.
-     *
-     * This will allow us to use PolygonMesh with any shader program, without
-     * assuming that the attribute names in the mesh and the names of
-     * shader variables will be the same.
-
-       We create such a shader variable -> vertex attribute mapping now
-     */
     map<string, string> shaderVarsToVertexAttribs;
 
     shaderVarsToVertexAttribs["vPosition"] = "position";
@@ -95,7 +83,8 @@ void View::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib
          it++)
     {
         util::ObjectInstance *obj = new util::ObjectInstance(it->first);
-        obj->initPolygonMesh(shaderLocations,
+        obj->initPolygonMesh(program,
+                             shaderLocations,
                              shaderVarsToVertexAttribs,
                              it->second);
         objects[it->first] = obj;
