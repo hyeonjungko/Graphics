@@ -19,7 +19,7 @@ leaf node-3-0 one-box instanceof box
 #light1
 light light1
 position 120 120 120
-direction 0 0 0
+direction 0 0 1
 ambient 0.611 0.349 0.207
 diffuse 0.4 0.4 0.6
 specular 0 0 0.8

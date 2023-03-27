@@ -220,6 +220,14 @@ void View::display(sgraph::IScenegraph *scenegraph)
     // pass light color properties to shader
     glUniform1i(shaderLocations.getLocation("numLights"), lights.size());
 
+    // pass light colors to the shader
+    for (int i = 0; i < lights.size(); i++)
+    {
+        glUniform3fv(lightLocations[i].ambient, 1, glm::value_ptr(lights[i].getAmbient()));
+        glUniform3fv(lightLocations[i].diffuse, 1, glm::value_ptr(lights[i].getDiffuse()));
+        glUniform3fv(lightLocations[i].specular, 1, glm::value_ptr(lights[i].getSpecular()));
+    }
+
     // draw scene graph here
     scenegraph->getRoot()
         ->accept(renderer);

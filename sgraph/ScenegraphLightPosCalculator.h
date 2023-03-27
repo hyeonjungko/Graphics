@@ -58,7 +58,6 @@ namespace sgraph
                 printf("calculated new position\n");
                 light.second->setPosition(newPos);
                 lights[light.first] = light.second;
-                // lights[light.first]->setPosition(newPos);
                 printf("updated a light's position in group node\n");
             }
         }
