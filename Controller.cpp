@@ -53,8 +53,9 @@ Controller::~Controller()
 void Controller::run()
 {
     sgraph::IScenegraph *scenegraph = model.getScenegraph();
-    map<string, util::PolygonMesh<VertexAttrib>> meshes = scenegraph->getMeshes();
-    view.init(this, meshes);
+    // map<string, util::PolygonMesh<VertexAttrib>> meshes = scenegraph->getMeshes();
+    // view.init(this, meshes);
+    view.init(this, model);
 
     while (!view.shouldWindowClose())
     {

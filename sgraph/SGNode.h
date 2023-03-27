@@ -5,6 +5,7 @@
 #include <vector>
 #include <stack>
 #include <string>
+#include <map>
 
 #include "Light.h"
 using namespace std;
@@ -69,14 +70,14 @@ namespace sgraph
      * Accept a visitor to visit this node
      *
      */
-
     virtual void accept(SGNodeVisitor *visitor) = 0;
+
     /**
      * Attaches the Light object to this node
      */
-    virtual void attachLight(util::Light light) = 0;
+    virtual void attachLight(string name, util::Light *light) = 0;
 
-    virtual vector<util::Light> getLights() = 0;
+    virtual map<string, util::Light *> getLights() = 0;
   };
 }
 

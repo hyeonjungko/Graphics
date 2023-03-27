@@ -12,7 +12,7 @@ namespace sgraph
 
   /**
    * This abstract class implements the sgraph::SGNode interface.
-   * \author Amit Shesh
+   * \author Amit Shesh & Hyeonjung Ko
    */
   class AbstractSGNode : public SGNode
   {
@@ -29,7 +29,7 @@ namespace sgraph
      * A reference to the sgraph::IScenegraph object that this is part of
      */
     sgraph::IScenegraph *scenegraph;
-    vector<util::Light> lights;
+    map<string, util::Light *> lights;
 
   public:
     AbstractSGNode(const string &name, sgraph::IScenegraph *graph)
@@ -91,12 +91,13 @@ namespace sgraph
     /**
      * Attaches the Light object to this node
      */
-    void attachLight(util::Light light)
+    void attachLight(string name, util::Light *light)
     {
-      lights.push_back(light);
+      printf("here\n");
+      lights[name] = light;
     }
 
-    vector<util::Light> getLights()
+    map<string, util::Light *> getLights()
     {
       return lights;
     }

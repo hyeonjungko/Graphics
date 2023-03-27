@@ -3,7 +3,7 @@
 
 #include "../ImageLoader.h"
 #include "../PPMImageLoader.h"
-#include "../TextureImage.h"
+#include "TextureImage.h"
 #include "SGNodeVisitor.h"
 #include "GroupNode.h"
 #include "LeafNode.h"
@@ -65,11 +65,11 @@ namespace sgraph
          */
         void visitLeafNode(LeafNode *leafNode)
         {
-
             // load in the textures TODO: this is an intermediate step
-            ImageLoader *loader = new PPMImageLoader();
-            loader->load("textures/earthmap.ppm");
-            util::TextureImage *textureObject = new util::TextureImage(loader->getPixels(), loader->getWidth(), loader->getHeight(), "earthmap");
+            // ImageLoader *loader = new PPMImageLoader();
+            // loader->load("textures/earthmap.ppm");
+            // util::TextureImage *textureObject = new util::TextureImage(loader->getPixels(), loader->getWidth(), loader->getHeight(), "earthmap");
+            util::TextureImage *textureObject = leafNode->getTexture();
 
             unsigned int textureId;
             glGenTextures(1, &textureId);

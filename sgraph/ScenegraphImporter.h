@@ -1,6 +1,10 @@
 #ifndef _SCENEGRAPHIMPORTER_H_
 #define _SCENEGRAPHIMPORTER_H_
 
+#include <ObjImporter.h>
+#include "../ImageLoader.h"
+#include "../PPMImageLoader.h"
+#include "TextureImage.h"
 #include "IScenegraph.h"
 #include "Scenegraph.h"
 #include "Light.h"
@@ -48,6 +52,10 @@ namespace sgraph
                         meshes[name] = mesh;
                     }
                 }
+                else if (command == "texture-image")
+                {
+                    parseTextureImage(inputWithOutComments);
+                }
                 else if (command == "group")
                 {
                     parseGroup(inputWithOutComments);
@@ -92,6 +100,10 @@ namespace sgraph
                 {
                     parseAssignMaterial(inputWithOutComments);
                 }
+                else if (command == "assign-texture")
+                {
+                    parseAssignTexture(inputWithOutComments);
+                }
                 else if (command == "add-child")
                 {
                     parseAddChild(inputWithOutComments);
@@ -120,6 +132,16 @@ namespace sgraph
         }
 
     protected:
+        virtual void parseTextureImage(istream &input)
+        {
+            string varname, filename;
+            input >> varname >> filename;
+            cout << "Read " << varname << " " << filename << endl;
+            ImageLoader *loader = new PPMImageLoader();
+            loader->load(filename);
+            util::TextureImage *textureObject = new util::TextureImage(loader->getPixels(), loader->getWidth(), loader->getHeight(), varname);
+            textureObjects[varname] = textureObject;
+        }
         virtual void parseGroup(istream &input)
         {
             string varname, name;
@@ -135,10 +157,12 @@ namespace sgraph
             input >> varname >> name;
             cout << "Read " << varname << " " << name << endl;
             input >> command;
+
             if (command == "instanceof")
             {
                 input >> instanceof ;
             }
+
             SGNode *leaf = new LeafNode(instanceof, name, NULL);
             nodes[varname] = leaf;
         }
@@ -237,21 +261,25 @@ namespace sgraph
                 }
                 input >> command;
             }
-            lights[name] = light;
+            lights[name] = &light;
         }
 
-        virtual void parseAttachLight(istream &input) // TODO:
+        virtual void parseAttachLight(istream &input)
         {
-            string lightname, nodename;
-
-            input >> lightname >> nodename;
+            string nodename, lightname;
+            input >> nodename >> lightname;
 
             SGNode *node = NULL;
             util::Light *light = NULL;
 
-            if (nodes.find(nodename) != nodes.end() && (lights.find(lightname) != lights.end()))
+            printf("\nIN parseAttachLight, checking if nodename, lightname %s exists...\n", lightname.c_str());
+            printf("first element in lights %s\n", lights.begin()->first.c_str());
+            printf("first element in nodes %s\n", nodes.begin()->first.c_str());
+            if ((nodes.find(nodename) != nodes.end()) && (lights.find(lightname) != lights.end()))
             {
-                node->attachLight(lights[lightname]);
+                printf("found %s, attaching light...\n", lightname.c_str());
+                nodes[nodename]->attachLight(lightname, lights[lightname]);
+                printf("out from attachLight");
             }
         }
 
@@ -341,6 +369,21 @@ namespace sgraph
             }
         }
 
+        virtual void parseAssignTexture(istream &input)
+        {
+            /**
+             * texture-image earthmap textures/earthmap.ppm
+             * assign-texture node-3-0 earthmap
+             */
+            string nodename, texturename;
+            input >> nodename >> texturename;
+
+            LeafNode *leafNode = dynamic_cast<LeafNode *>(nodes[nodename]);
+            if ((leafNode != NULL) && (textureObjects.find(texturename) != textureObjects.end()))
+            {
+                leafNode->setTexture(textureObjects[texturename]);
+            }
+        }
         virtual void parseAssignMaterial(istream &input)
         {
             string nodename, matname;
@@ -401,8 +444,9 @@ namespace sgraph
     private:
         map<string, SGNode *> nodes;
         map<string, util::Material> materials;
-        map<string, util::Light> lights;
         map<string, util::PolygonMesh<VertexAttrib>> meshes;
+        map<string, util::Light *> lights;
+        map<string, util::TextureImage *> textureObjects;
         map<string, string> meshPaths;
         SGNode *root;
     };

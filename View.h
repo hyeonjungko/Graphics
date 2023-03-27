@@ -14,17 +14,35 @@
 #include "VertexAttrib.h"
 #include "Callbacks.h"
 #include "sgraph/IScenegraph.h"
+#include "Model.h"
 
 #include <stack>
 using namespace std;
 
 class View
 {
-    typedef enum {GLOBAL, CHOPPER, FPS} TypeOfCamera;
+    typedef enum
+    {
+        GLOBAL,
+        CHOPPER,
+        FPS
+    } TypeOfCamera;
+
+    class LightLocation
+    {
+    public:
+        int ambient, diffuse, specular, position;
+        LightLocation()
+        {
+            ambient = diffuse = specular = position = -1;
+        }
+    };
+
 public:
     View();
     ~View();
-    void init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib>> &meshes);
+    // void init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib>> &meshes);
+    void init(Callbacks *callbacks, Model &model);
     void display(sgraph::IScenegraph *scenegraph);
     void setProjection(int width, int height);
     tuple<float, float> getCurrentMousePositions();
@@ -42,24 +60,29 @@ public:
     void turnUp();
     void turnDown();
     void setFrustumVertices();
+    void calculateLightPos(sgraph::IScenegraph *scenegraph);
+    void initLightShaderVars();
+
 private:
     GLFWwindow *window;
     util::ShaderProgram program;
     util::ShaderLocationsVault shaderLocations;
     map<string, util::ObjectInstance *> objects;
+    vector<util::Light> lights;
+    vector<LightLocation> lightLocations;
     glm::mat4 projection;
     stack<glm::mat4> modelview;
     sgraph::SGNodeVisitor *renderer;
     int frames;
     double time;
     float xRotAngle;
-    float yRotAngle; 
+    float yRotAngle;
     TypeOfCamera cameraMode;
     glm::vec3 personEyePosition, personDirection, personUp;
     float left;
-    float up; 
+    float up;
     float aspectRatio;
-    
+
     vector<util::PolygonMesh<VertexAttrib>> frustum_meshes;
     vector<util::ObjectInstance *> frustum_objects;
 };

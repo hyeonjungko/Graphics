@@ -7,6 +7,7 @@ using namespace std;
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "sgraph/GLScenegraphRenderer.h"
+#include "sgraph/ScenegraphLightPosCalculator.h"
 #include "VertexAttrib.h"
 
 View::View()
@@ -17,8 +18,11 @@ View::~View()
 {
 }
 
-void View::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib>> &meshes)
+void View::init(Callbacks *callbacks, Model &model)
 {
+    sgraph::IScenegraph *scenegraph = model.getScenegraph();
+    map<string, util::PolygonMesh<VertexAttrib>> meshes = scenegraph->getMeshes();
+
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
@@ -113,6 +117,38 @@ void View::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib
     ; // assume person's eyes are at head height
     personDirection = glm::vec3(0.0f, 10.0f, 100.0f);
     personUp = glm::vec3(0.0f, 1.0f, 0.0f); // assume person's up direction is positive y-axis
+
+    // calculateLightPos(model);
+    // initLightShaderVars();
+}
+
+void View::calculateLightPos(sgraph::IScenegraph *scenegraph)
+{
+    // calculate light positions
+    // sgraph::IScenegraph *scenegraph = model.getScenegraph();
+    sgraph::ScenegraphLightPosCalculator *lightPosCalc = new sgraph::ScenegraphLightPosCalculator(modelview);
+    printf("\nin calculateLightPos before light pos calc visitor visits\n");
+    scenegraph->getRoot()->accept(lightPosCalc);
+    printf("\nin calculateLightPos after light pos calc visitor visits\n");
+    lights = lightPosCalc->getScenegraphLights();
+    printf("%d lights in scene\n", lights.size());
+}
+
+void View::initLightShaderVars()
+{
+    // get input variables that need to be given to the shader program
+    for (int i = 0; i < lights.size(); i++)
+    {
+        LightLocation ll;
+        stringstream name;
+
+        name << "light[" << i << "]";
+        ll.ambient = shaderLocations.getLocation(name.str() + "" + ".ambient");
+        ll.diffuse = shaderLocations.getLocation(name.str() + ".diffuse");
+        ll.specular = shaderLocations.getLocation(name.str() + ".specular");
+        ll.position = shaderLocations.getLocation(name.str() + ".position");
+        lightLocations.push_back(ll);
+    }
 }
 
 void View::display(sgraph::IScenegraph *scenegraph)
@@ -163,6 +199,26 @@ void View::display(sgraph::IScenegraph *scenegraph)
                       glm::rotate(glm::mat4(1.0), glm::radians(xRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+    // LIGHTS
+    //////////////////////////
+    // calculate light positions
+    printf("\nbefore light position calculations\n");
+    calculateLightPos(scenegraph);
+    printf("\nafter light position calculations\n");
+    // get input variables that need to be given to the shader program
+    initLightShaderVars();
+    //////////////////////////
+
+    // draw lights
+    for (int i = 0; i < lights.size(); i++)
+    {
+        glm::vec4 pos = lights[i].getPosition();
+        glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
+    }
+
+    // pass light color properties to shader
+    glUniform1i(shaderLocations.getLocation("numLights"), lights.size());
 
     // draw scene graph here
     scenegraph->getRoot()
