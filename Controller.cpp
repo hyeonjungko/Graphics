@@ -43,7 +43,6 @@ void Controller::initScenegraph()
          << "\n";
 
     IScenegraph *scenegraph = importer.parse(inFile);
-    // scenegraph->setMeshes(meshes);
     model.setScenegraph(scenegraph);
 }
 
@@ -56,12 +55,6 @@ void Controller::run()
     sgraph::IScenegraph *scenegraph = model.getScenegraph();
     map<string, util::PolygonMesh<VertexAttrib>> meshes = scenegraph->getMeshes();
     view.init(this, meshes);
-
-    // sgraph::IScenegraph *scenegraph = model.getScenegraph();
-    // map<string, string> meshPaths = scenegraph->getMeshPaths();                  //
-    // sgraph::SGNodeVisitor *exporter = new sgraph::ScenegraphExporter(meshPaths); //
-    // scenegraph->getRoot()->accept(exporter);
-    // exporter->getOutput(); // can't call derived class functions from base class. must write another visitor
 
     while (!view.shouldWindowClose())
     {

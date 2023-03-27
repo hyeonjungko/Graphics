@@ -26,6 +26,5 @@ private:
     bool isLeftMousePressed;
     float prev_mouse_x = 0;
     float prev_mouse_y = 0;
-
 };
 #endif

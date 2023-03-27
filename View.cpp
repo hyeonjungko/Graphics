@@ -65,11 +65,11 @@ void View::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib
     glfwSwapInterval(1);
 
     // create the shader program
-    program.createProgram(string("shaders/default.vert"),
-                          string("shaders/default.frag"));
-    // assuming it got created, get all the shader variables that it uses
-    // so we can initialize them at some point
-    // enable the shader program
+    program.createProgram(string("shaders/default.vert"), string("shaders/default.frag"));
+    // program.createProgram(string("shaders/phong-multiple.vert"), string("shaders/phong-multiple.frag"));
+    //  assuming it got created, get all the shader variables that it uses
+    //  so we can initialize them at some point
+    //  enable the shader program
     program.enable();
     shaderLocations = program.getAllShaderVariables();
 
@@ -87,44 +87,33 @@ void View::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib
     map<string, string> shaderVarsToVertexAttribs;
 
     shaderVarsToVertexAttribs["vPosition"] = "position";
-
-    // setFrustumVertices();
-
-    for (int i = 0; i < frustum_meshes.size(); i++)
-    {
-        util::ObjectInstance *obj = new util::ObjectInstance("triangles");
-        obj->initPolygonMesh<VertexAttrib>(
-            program,                   // the shader program
-            shaderLocations,           // the shader locations
-            shaderVarsToVertexAttribs, // the shader variable -> attrib map
-            frustum_meshes[i]);        // the actual mesh object
-
-        frustum_objects.push_back(obj);
-    }
+    shaderVarsToVertexAttribs["vNormal"] = "normal";
+    shaderVarsToVertexAttribs["vTexCoord"] = "texcoord";
 
     for (typename map<string, util::PolygonMesh<VertexAttrib>>::iterator it = meshes.begin();
          it != meshes.end();
          it++)
     {
         util::ObjectInstance *obj = new util::ObjectInstance(it->first);
-        obj->initPolygonMesh(shaderLocations, shaderVarsToVertexAttribs, it->second);
+        obj->initPolygonMesh(shaderLocations,
+                             shaderVarsToVertexAttribs,
+                             it->second);
         objects[it->first] = obj;
     }
+
+    renderer = new sgraph::GLScenegraphRenderer(modelview, objects, shaderLocations);
 
     int window_width, window_height;
     aspectRatio = (float)window_width / window_height;
     glfwGetFramebufferSize(window, &window_width, &window_height);
 
     // prepare the projection matrix for perspective projection
-
     projection = glm::perspective(glm::radians(90.0f), (float)window_width / window_height, 0.1f, 10000.0f);
 
     glViewport(0, 0, window_width, window_height);
 
     frames = 0;
     time = glfwGetTime();
-
-    renderer = new sgraph::GLScenegraphRenderer(modelview, objects, shaderLocations);
 
     cameraMode = GLOBAL;
     float left = 0.0f;
@@ -144,11 +133,12 @@ void View::display(sgraph::IScenegraph *scenegraph)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
-    // change to line or "wireframe" mode
-    modelview.push(glm::mat4(1.0));
+    while (!modelview.empty())
+    {
+        modelview.pop();
+    }
 
-    glm::vec3 start = glm::vec3(-1.0f, 0.0f, 0.0f);
-    glm::vec3 end = glm::vec3(1.0f, 0.0f, 0.0f);
+    modelview.push(glm::mat4(1.0));
 
     if (cameraMode == GLOBAL)
     {
@@ -179,36 +169,18 @@ void View::display(sgraph::IScenegraph *scenegraph)
     }
 
     modelview.push(modelview.top());
-
     modelview.top() = modelview.top() *
                       glm::rotate(glm::mat4(1.0), glm::radians(yRotAngle), glm::vec3(1.0f, 0.0f, 0.0f)) *
                       glm::rotate(glm::mat4(1.0), glm::radians(xRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 
-    glUniformMatrix4fv(shaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview.top()));
-
-    // send projection matrix to GPU
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-    glm::vec4 color(1, 0, 0, 1); // red
-    glUniform4fv(shaderLocations.getLocation("vColor"), 1, glm::value_ptr(color));
-
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // TODO:
-
-    for (int i = 0; i < frustum_objects.size(); i++)
-    {
-        frustum_objects[i]->draw();
-    }
 
     // draw scene graph here
     scenegraph->getRoot()
         ->accept(renderer);
 
-    modelview.pop();
-    modelview.pop();
-
     glFlush();
     program.disable();
-
     glfwSwapBuffers(window);
     glfwPollEvents();
     frames++;
