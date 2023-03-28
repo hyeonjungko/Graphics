@@ -120,13 +120,16 @@ void View::init(Callbacks *callbacks, Model &model)
 
     // calculateLightPos(model);
     // initLightShaderVars();
+    printf("\nbefore light position calculations\n");
+    calculateLightPos(scenegraph);
+    printf("\nafter light position calculations\n");
+    // get input variables that need to be given to the shader program
+    initLightShaderVars();
 }
 
 void View::calculateLightPos(sgraph::IScenegraph *scenegraph)
 {
-    // calculate light positions
-    // sgraph::IScenegraph *scenegraph = model.getScenegraph();
-    sgraph::ScenegraphLightPosCalculator *lightPosCalc = new sgraph::ScenegraphLightPosCalculator(modelview);
+    sgraph::ScenegraphLightPosCalculator *lightPosCalc = new sgraph::ScenegraphLightPosCalculator();
     printf("\nin calculateLightPos before light pos calc visitor visits\n");
     scenegraph->getRoot()->accept(lightPosCalc);
     printf("\nin calculateLightPos after light pos calc visitor visits\n");
@@ -201,13 +204,6 @@ void View::display(sgraph::IScenegraph *scenegraph)
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
     // LIGHTS
-    //////////////////////////
-    // calculate light positions
-    printf("\nbefore light position calculations\n");
-    calculateLightPos(scenegraph);
-    printf("\nafter light position calculations\n");
-    // get input variables that need to be given to the shader program
-    initLightShaderVars();
     //////////////////////////
 
     // draw lights

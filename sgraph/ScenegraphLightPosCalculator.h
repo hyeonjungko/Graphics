@@ -27,8 +27,16 @@ namespace sgraph
     class ScenegraphLightPosCalculator : public SGNodeVisitor
     {
     public:
-        ScenegraphLightPosCalculator(stack<glm::mat4> &mv) : modelview(mv)
+        ScenegraphLightPosCalculator()
         {
+            modelview.push(glm::mat4(1.0));
+        }
+        ~ScenegraphLightPosCalculator()
+        {
+            while (!modelview.empty())
+            {
+                modelview.pop();
+            }
         }
 
         vector<util::Light> getScenegraphLights()
@@ -107,7 +115,7 @@ namespace sgraph
         }
 
     private:
-        stack<glm::mat4> &modelview;
+        stack<glm::mat4> modelview;
         util::ShaderLocationsVault shaderLocations;
         map<string, util::ObjectInstance *> objects;
         map<string, util::Light> lights;
