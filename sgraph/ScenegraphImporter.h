@@ -217,11 +217,21 @@ namespace sgraph
             input >> command;
             while (command != "end-light")
             {
+                std::cout << "\nParser.parseLight WHILE LOOP: \nname: "
+                          << name
+                          << "\nPOSITION: " << light.getPosition()
+                          << "\nAMBIENT: " << light.getAmbient()
+                          << "\nDIFFUSE: " << light.getDiffuse()
+                          << "\nSPECULAR: " << light.getSpecular()
+                          << "\n"
+                          << std::endl;
                 if (command == "position")
                 {
                     input >> x >> y >> z;
                     printf("pos: %f, %f, %f\n", x, y, z);
                     light.setPosition(x, y, z);
+                    // light.setPosition(glm::vec4(x, y, z, 1.0f));
+                    // std::cout << "AFTER INITIAL SETTING Parser.parseLight: lights[name]: " << name << ", pos: " << light.getPosition() << std::endl;
                 }
                 else if (command == "direction")
                 {
@@ -234,6 +244,7 @@ namespace sgraph
                     input >> r >> g >> b;
                     printf("ambient: %f, %f, %f\n", r, g, b);
                     light.setAmbient(r, g, b);
+                    // std::cout << "AFTER INITIAL SETTING Parser.parseLight: lights[name]: " << name << ", ambient: " << light.getAmbient() << std::endl;
                 }
                 else if (command == "diffuse")
                 {
@@ -245,7 +256,7 @@ namespace sgraph
                 {
                     input >> r >> g >> b;
                     printf("specular: %f, %f, %f\n", r, g, b);
-                    // light.setSpecular(r, g, b);
+                    light.setSpecular(r, g, b);
                 }
                 else if (command == "spot-direction")
                 {
@@ -261,9 +272,16 @@ namespace sgraph
                 }
                 input >> command;
             }
+            // std::cout << "BEFORE SETTING Parser.parseLight: light: " << name << ", pos: " << light.getPosition() << std::endl;
+            // std::cout << "BEFORE SETTING Parser.parseLight: light: " << name << ", ambient: " << light.getAmbient() << std::endl;
+            // std::cout << "BEFORE SETTING Parser.parseLight: light: " << name << ", diffuse: " << light.getDiffuse() << std::endl;
+            // std::cout << "BEFORE SETTING Parser.parseLight: light: " << name << ", specular: " << light.getSpecular() << std::endl;
             lights[name] = light;
             // std::cout << lights[name] << endl;
-            std::cout << "Parser.parseLight: name: " << name << ", pos: " << lights[name].getPosition() << std::endl;
+            // std::cout << "Parser.parseLight: lights[name]: " << name << ", pos: " << lights[name].getPosition() << std::endl;
+            // std::cout << "Parser.parseLight: lights[name]: " << name << ", ambient: " << lights[name].getAmbient() << std::endl;
+            // std::cout << "Parser.parseLight: lights[name]: " << name << ", diffuse: " << lights[name].getDiffuse() << std::endl;
+            // std::cout << "Parser.parseLight: lights[name]: " << name << ", specular: " << lights[name].getSpecular() << std::endl;
         }
 
         virtual void parseAttachLight(istream &input)
