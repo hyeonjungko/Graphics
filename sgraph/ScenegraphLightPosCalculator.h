@@ -36,7 +36,7 @@ namespace sgraph
             vector<util::Light> justLights;
             for (auto light : lights)
             {
-                justLights.push_back(*light.second);
+                justLights.push_back((light.second));
             }
 
             return justLights;
@@ -54,9 +54,9 @@ namespace sgraph
             for (auto &light : groupNode->getLights())
             {
                 printf("found a light in group node\n");
-                glm::vec4 newPos = modelview.top() * (light.second->getPosition());
+                glm::vec4 newPos = modelview.top() * (light.second.getPosition());
                 printf("calculated new position\n");
-                light.second->setPosition(newPos);
+                light.second.setPosition(newPos);
                 lights[light.first] = light.second;
                 printf("updated a light's position in group node\n");
             }
@@ -67,8 +67,8 @@ namespace sgraph
             // for each light in leaf node, update position
             for (auto &light : leafNode->getLights())
             {
-                glm::vec4 newPos = modelview.top() * light.second->getPosition();
-                lights[light.first]->setPosition(newPos);
+                glm::vec4 newPos = modelview.top() * light.second.getPosition();
+                lights[light.first].setPosition(newPos);
             }
         }
 
@@ -110,7 +110,7 @@ namespace sgraph
         stack<glm::mat4> &modelview;
         util::ShaderLocationsVault shaderLocations;
         map<string, util::ObjectInstance *> objects;
-        map<string, util::Light *> lights;
+        map<string, util::Light> lights;
     };
 }
 

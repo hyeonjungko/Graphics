@@ -75,9 +75,9 @@ namespace sgraph
     /**
      * Attaches the Light object to this node
      */
-    virtual void attachLight(string name, util::Light *light) = 0;
+    virtual void attachLight(string name, util::Light light) = 0;
 
-    virtual map<string, util::Light *> getLights() = 0;
+    virtual map<string, util::Light> getLights() = 0;
   };
 }
 

@@ -30,7 +30,7 @@ namespace sgraph
      * A reference to the sgraph::IScenegraph object that this is part of
      */
     sgraph::IScenegraph *scenegraph;
-    map<string, util::Light *> lights;
+    map<string, util::Light> lights;
 
   public:
     AbstractSGNode(const string &name, sgraph::IScenegraph *graph)
@@ -92,14 +92,14 @@ namespace sgraph
     /**
      * Attaches the Light object to this node
      */
-    void attachLight(string name, util::Light *light)
+    void attachLight(string name, util::Light light)
     {
       // printf("node.attachLight %s\n", glm::to_string(light->getPosition()).c_str());
-      std::cout << "node.attachLight: " << light->getPosition() << std::endl;
+      std::cout << "node.attachLight: " << light.getPosition() << std::endl;
       lights[name] = light;
     }
 
-    map<string, util::Light *> getLights()
+    map<string, util::Light> getLights()
     {
       return lights;
     }

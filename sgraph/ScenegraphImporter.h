@@ -261,8 +261,9 @@ namespace sgraph
                 }
                 input >> command;
             }
-            lights[name] = &light;
-            std::cout << "Parser.parseLight: name: " << name << ", pos: " << lights[name]->getPosition() << std::endl;
+            lights[name] = light;
+            // std::cout << lights[name] << endl;
+            std::cout << "Parser.parseLight: name: " << name << ", pos: " << lights[name].getPosition() << std::endl;
         }
 
         virtual void parseAttachLight(istream &input)
@@ -271,15 +272,20 @@ namespace sgraph
             input >> nodename >> lightname;
 
             SGNode *node = NULL;
-            util::Light *light = NULL;
+            util::Light light;
 
             printf("\nIN parseAttachLight, checking if nodename, lightname %s exists...\n", lightname.c_str());
             printf("first element in lights %s\n", lights.begin()->first.c_str());
             printf("first element in nodes %s\n", nodes.begin()->first.c_str());
             if ((nodes.find(nodename) != nodes.end()) && (lights.find(lightname) != lights.end()))
             {
+                light = lights[lightname];
+
                 printf("found %s, attaching light...\n", lightname.c_str());
-                nodes[nodename]->attachLight(lightname, lights[lightname]);
+                // std::cout << light << endl;
+                std::cout << "parser.parseAttachLight(): pos: " << light.getPosition() << std::endl;
+
+                nodes[nodename]->attachLight(lightname, light);
                 printf("out from attachLight\n");
             }
         }
@@ -446,7 +452,7 @@ namespace sgraph
         map<string, SGNode *> nodes;
         map<string, util::Material> materials;
         map<string, util::PolygonMesh<VertexAttrib>> meshes;
-        map<string, util::Light *> lights;
+        map<string, util::Light> lights;
         map<string, util::TextureImage *> textureObjects;
         map<string, string> meshPaths;
         SGNode *root;
