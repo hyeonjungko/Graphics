@@ -4,10 +4,13 @@ instance box models/box.obj
 #material
 material mat-node-3-0
 emission 0 0 0
-ambient 1 0 0
-diffuse 1 0 0
-specular 1 0 0
-shininess 0
+ambient 0.3 0.3 0.3
+diffuse 0.7 0.7 0.7
+specular 0.7 0.7 0.7
+# ambient 0 0 0 
+# diffuse 0 0 0 
+# specular 0 0 0
+shininess 100
 end-material
 
 
@@ -18,11 +21,11 @@ leaf node-3-0 one-box instanceof box
 
 #light1
 light light1
-position 120 120 120
-direction 0 0 1
-ambient 0.611 0.349 0.207
-diffuse 0.4 0.4 0.6
-specular 0 0 0.8
+position 100 100 100
+#direction 0 0 0
+ambient 0.0 0.3 0.3
+diffuse 0.5 0.5 0.5
+specular 0.5 0.5 0.5
 end-light
 
 attach-light node-1-0 light1

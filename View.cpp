@@ -211,9 +211,12 @@ void View::display(sgraph::IScenegraph *scenegraph)
     //////////////////////////
 
     // draw lights
+    glEnable(GL_LIGHTING);
     for (int i = 0; i < lights.size(); i++)
     {
         glm::vec4 pos = lights[i].getPosition();
+        glm::mat4 lightTransformation = modelview.top();
+        pos = lightTransformation * pos;
         glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
     }
 

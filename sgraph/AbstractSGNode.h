@@ -5,6 +5,7 @@
 #include "IScenegraph.h"
 #include "glm/glm.hpp"
 #include <string>
+#include <glm/gtx/string_cast.hpp>
 using namespace std;
 
 namespace sgraph
@@ -93,7 +94,8 @@ namespace sgraph
      */
     void attachLight(string name, util::Light *light)
     {
-      printf("here\n");
+      // printf("node.attachLight %s\n", glm::to_string(light->getPosition()).c_str());
+      std::cout << "node.attachLight: " << light->getPosition() << std::endl;
       lights[name] = light;
     }
 

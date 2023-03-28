@@ -262,6 +262,7 @@ namespace sgraph
                 input >> command;
             }
             lights[name] = &light;
+            std::cout << "Parser.parseLight: name: " << name << ", pos: " << lights[name]->getPosition() << std::endl;
         }
 
         virtual void parseAttachLight(istream &input)
@@ -279,7 +280,7 @@ namespace sgraph
             {
                 printf("found %s, attaching light...\n", lightname.c_str());
                 nodes[nodename]->attachLight(lightname, lights[lightname]);
-                printf("out from attachLight");
+                printf("out from attachLight\n");
             }
         }
 
