@@ -38,7 +38,7 @@ namespace sgraph
          */
         void accept(SGNodeVisitor *visitor)
         {
-            printf("in rotatetransform node accept\n");
+            // printf("in rotatetransform node accept\n");
             return visitor->visitRotateTransform(this);
         }
 

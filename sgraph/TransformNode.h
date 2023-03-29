@@ -78,7 +78,7 @@ namespace sgraph
      */
     void accept(SGNodeVisitor *visitor)
     {
-      printf("in transform node accept\n");
+      // printf("in transform node accept\n");
       return visitor->visitTransformNode(this);
     }
   };

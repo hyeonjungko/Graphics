@@ -9,8 +9,9 @@
 #include <cstdio>
 #include <ShaderProgram.h>
 #include "sgraph/SGNodeVisitor.h"
+#include "sgraph/ScenegraphLightPosCalculator.h"
 #include "ObjectInstance.h"
-#include "PolygonMesh.h"
+// #include "PolygonMesh.h"
 #include "VertexAttrib.h"
 #include "Callbacks.h"
 #include "sgraph/IScenegraph.h"
@@ -31,10 +32,10 @@ class View
     class LightLocation
     {
     public:
-        int ambient, diffuse, specular, position;
+        int ambient, diffuse, specular, position, spotAngle, spotDirection, isSpotlight;
         LightLocation()
         {
-            ambient = diffuse = specular = position = -1;
+            ambient = diffuse = specular = position = spotAngle = spotDirection = isSpotlight = -1;
         }
     };
 
@@ -60,7 +61,7 @@ public:
     void turnUp();
     void turnDown();
     void setFrustumVertices();
-    void calculateLightPos(sgraph::IScenegraph *scenegraph);
+    void calculateLightPos(sgraph::IScenegraph *scenegraph); //
     void initLightShaderVars();
 
 private:
@@ -73,6 +74,7 @@ private:
     glm::mat4 projection;
     stack<glm::mat4> modelview;
     sgraph::SGNodeVisitor *renderer;
+    sgraph::ScenegraphLightPosCalculator *lightPosCalculator;
     int frames;
     double time;
     float xRotAngle;

@@ -1,8 +1,8 @@
 #ifndef __MODEL_H__
 #define __MODEL_H__
 
-#include "PolygonMesh.h"
-#include "VertexAttrib.h"
+// #include "PolygonMesh.h"
+// #include "VertexAttrib.h"
 #include "sgraph/IScenegraph.h"
 #include <map>
 using namespace std;

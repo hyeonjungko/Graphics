@@ -8,7 +8,7 @@ using namespace std;
 #include <glm/gtc/type_ptr.hpp>
 #include "sgraph/GLScenegraphRenderer.h"
 #include "sgraph/ScenegraphLightPosCalculator.h"
-#include "VertexAttrib.h"
+// #include "VertexAttrib.h"
 
 View::View()
 {
@@ -68,8 +68,10 @@ void View::init(Callbacks *callbacks, Model &model)
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1);
 
-    // program.createProgram(string("shaders/default.vert"), string("shaders/default.frag"));
-    program.createProgram(string("shaders/phong-multiple.vert"), string("shaders/phong-multiple.frag"));
+    // TODO:
+    // program.createProgram(string("shaders/phong-multiple.vert"), string("shaders/phong-multiple.frag"));
+    // program.createProgram(string("shaders/phong-multiple-light-only.vert"), string("shaders/phong-multiple-light-only.frag"));
+    program.createProgram(string("shaders/phong-multiple-with-texture-spotlights.vert"), string("shaders/phong-multiple-with-texture-spotlights.frag"));
     //  assuming it got created, get all the shader variables that it uses
     //  so we can initialize them at some point
     //  enable the shader program
@@ -95,6 +97,10 @@ void View::init(Callbacks *callbacks, Model &model)
     }
 
     renderer = new sgraph::GLScenegraphRenderer(modelview, objects, shaderLocations);
+    lightPosCalculator = new sgraph::ScenegraphLightPosCalculator(modelview);
+    // // printf("\nbefore light position calculations\n");
+    // calculateLightPos(scenegraph);
+    // // printf("\nafter light position calculations\n");
 
     int window_width, window_height;
     aspectRatio = (float)window_width / window_height;
@@ -118,24 +124,19 @@ void View::init(Callbacks *callbacks, Model &model)
     personDirection = glm::vec3(0.0f, 10.0f, 100.0f);
     personUp = glm::vec3(0.0f, 1.0f, 0.0f); // assume person's up direction is positive y-axis
 
-    // calculateLightPos(model);
-    // initLightShaderVars();
-    printf("\nbefore light position calculations\n");
-    calculateLightPos(scenegraph);
-    printf("\nafter light position calculations\n");
     // get input variables that need to be given to the shader program
     initLightShaderVars();
 }
 
-void View::calculateLightPos(sgraph::IScenegraph *scenegraph)
-{
-    sgraph::ScenegraphLightPosCalculator *lightPosCalc = new sgraph::ScenegraphLightPosCalculator();
-    printf("\nin calculateLightPos before light pos calc visitor visits\n");
-    scenegraph->getRoot()->accept(lightPosCalc);
-    printf("\nin calculateLightPos after light pos calc visitor visits\n");
-    lights = lightPosCalc->getScenegraphLights();
-    printf("%d lights in scene\n", lights.size());
-}
+// void View::calculateLightPos(sgraph::IScenegraph *scenegraph) // TODO: on't need this
+// {
+//     sgraph::ScenegraphLightPosCalculator *lightPosCalc = new sgraph::ScenegraphLightPosCalculator();
+//     // printf("\nin calculateLightPos before light pos calc visitor visits\n");
+//     scenegraph->getRoot()->accept(lightPosCalc);
+//     lights = lightPosCalc->getScenegraphLights();
+//     // printf("\nin calculateLightPos after light pos calc visitor visits\n");
+//     // printf("%d lights in scene\n", lights.size());
+// }
 
 void View::initLightShaderVars()
 {
@@ -150,6 +151,9 @@ void View::initLightShaderVars()
         ll.diffuse = shaderLocations.getLocation(name.str() + ".diffuse");
         ll.specular = shaderLocations.getLocation(name.str() + ".specular");
         ll.position = shaderLocations.getLocation(name.str() + ".position");
+        ll.spotDirection = shaderLocations.getLocation(name.str() + ".spotDirection");
+        ll.spotAngle = shaderLocations.getLocation(name.str() + ".spotAngle");
+        ll.isSpotlight = shaderLocations.getLocation(name.str() + ".isSpotlight");
         lightLocations.push_back(ll);
     }
 }
@@ -157,7 +161,8 @@ void View::initLightShaderVars()
 void View::display(sgraph::IScenegraph *scenegraph)
 {
     program.enable();
-    glClearColor(0, 0, 0, 1);
+    // glClearColor(0, 0, 0, 1);
+    glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
@@ -172,6 +177,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
     {
         modelview.top() = modelview.top() *
                           glm::lookAt(glm::vec3(100.0f, 100.0f, 150.0f),
+                                      // glm::lookAt(glm::vec3(0.0f, 0.0f, 150.0f),
                                       glm::vec3(0.0f, 0.0f, 0.0f),
                                       personUp);
     }
@@ -205,6 +211,9 @@ void View::display(sgraph::IScenegraph *scenegraph)
 
     // LIGHTS
     //////////////////////////
+    // calculate light positions & spotlight directions
+    scenegraph->getRoot()->accept(lightPosCalculator);
+    lights = lightPosCalculator->getScenegraphLights();
 
     // draw lights
     glEnable(GL_LIGHTING);
@@ -213,6 +222,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
         glm::vec4 pos = lights[i].getPosition();
         glm::mat4 lightTransformation = modelview.top();
         pos = lightTransformation * pos;
+
         glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
     }
 
@@ -222,9 +232,13 @@ void View::display(sgraph::IScenegraph *scenegraph)
     // pass light colors to the shader
     for (int i = 0; i < lights.size(); i++)
     {
+        cout << "isSpotlight: " << lights[i].getIsSpotlight() << endl;
         glUniform3fv(lightLocations[i].ambient, 1, glm::value_ptr(lights[i].getAmbient()));
         glUniform3fv(lightLocations[i].diffuse, 1, glm::value_ptr(lights[i].getDiffuse()));
         glUniform3fv(lightLocations[i].specular, 1, glm::value_ptr(lights[i].getSpecular()));
+        glUniform3fv(lightLocations[i].spotDirection, 1, glm::value_ptr(lights[i].getSpotDirection()));
+        glUniform1f(lightLocations[i].spotAngle, cos(glm::radians(lights[i].getSpotCutoff()))); // sending cosine of angle to shader
+        glUniform1i(lightLocations[i].isSpotlight, lights[i].getIsSpotlight());                 // sending cosine of angle to shader
     }
 
     // draw scene graph here
@@ -239,10 +253,37 @@ void View::display(sgraph::IScenegraph *scenegraph)
     double currenttime = glfwGetTime();
     if ((currenttime - time) > 1.0)
     {
-        printf("Framerate: %2.0f\r", frames / (currenttime - time));
+        // printf("Framerate: %2.0f\r", frames / (currenttime - time));
         frames = 0;
         time = currenttime;
     }
+
+    /*
+    void drawSpotlight(float posX, float posY, float posZ, float dirX, float dirY, float dirZ, float cutoffAngle, float exponent, float r, float g, float b)
+    {
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
+        GLfloat light_position[] = {posX, posY, posZ, 1.0f};
+        GLfloat light_direction[] = {dirX, dirY, dirZ, 0.0f};
+        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+        glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, light_direction);
+        glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, cutoffAngle);
+        glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, exponent);
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, {r, g, b, 1.0f});
+        glEnable(GL_COLOR_MATERIAL);
+        glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+        glBegin(GL_QUADS);
+        glNormal3f(0.0f, 1.0f, 0.0f);
+        glVertex3f(-50.0f, 0.0f, -50.0f);
+        glVertex3f(-50.0f, 0.0f, 50.0f);
+        glVertex3f(50.0f, 0.0f, 50.0f);
+        glVertex3f(50.0f, 0.0f, -50.0f);
+        glEnd();
+        glDisable(GL_LIGHT0);
+        glDisable(GL_LIGHTING);
+        glDisable(GL_COLOR_MATERIAL);
+    }
+    */
 }
 
 void View::setProjection(int width, int height)
@@ -348,7 +389,7 @@ void View::turnLeft()
 {
     if (cameraMode == FPS)
     {
-        // printf("\nturnLeft... left = %f", left);
+        // // printf("\nturnLeft... left = %f", left);
         left -= 3.0f;
     }
 }
@@ -357,7 +398,7 @@ void View::turnRight()
 {
     if (cameraMode == FPS)
     {
-        // printf("\nturnRight... left = %f", left);
+        // // printf("\nturnRight... left = %f", left);
         left += 3.0f;
     }
 }

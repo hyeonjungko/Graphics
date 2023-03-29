@@ -27,16 +27,15 @@ namespace sgraph
     class ScenegraphLightPosCalculator : public SGNodeVisitor
     {
     public:
-        ScenegraphLightPosCalculator()
+        ScenegraphLightPosCalculator(stack<glm::mat4> &mv) : modelview(mv)
         {
-            modelview.push(glm::mat4(1.0));
         }
         ~ScenegraphLightPosCalculator()
         {
-            while (!modelview.empty())
-            {
-                modelview.pop();
-            }
+            // while (!modelview.empty())
+            // {
+            //     modelview.pop();
+            // }
         }
 
         vector<util::Light> getScenegraphLights()
@@ -57,16 +56,18 @@ namespace sgraph
                 groupNode->getChildren()[i]->accept(this);
             }
 
-            printf("looking for lights in group node\n");
+            // printf("looking for lights in group node\n");
             // for each light in group node, update position
-            for (auto &light : groupNode->getLights())
+            for (auto light : groupNode->getLights()) // TODO:
             {
-                printf("found a light in group node\n");
+                // printf("found a light in group node\n");
                 glm::vec4 newPos = modelview.top() * (light.second.getPosition());
-                printf("calculated new position\n");
-                light.second.setPosition(newPos);
+                glm::vec4 newSpotDir = modelview.top() * (light.second.getSpotDirection());
+                // printf("calculated new position\n");
+                light.second.setPosition(newPos); // TODO: DONT set position of light in NODE, create a new Light object and add it to this Calc's map of Lights
+                light.second.setSpotDirection(newSpotDir.x, newSpotDir.y, newSpotDir.z);
                 lights[light.first] = light.second;
-                printf("updated a light's position in group node\n");
+                // printf("updated a light's position in group node\n");
             }
         }
 
@@ -76,7 +77,9 @@ namespace sgraph
             for (auto &light : leafNode->getLights())
             {
                 glm::vec4 newPos = modelview.top() * light.second.getPosition();
+                glm::vec4 newSpotDir = modelview.top() * (light.second.getSpotDirection());
                 lights[light.first].setPosition(newPos);
+                light.second.setSpotDirection(newSpotDir.x, newSpotDir.y, newSpotDir.z);
             }
         }
 
@@ -94,9 +97,9 @@ namespace sgraph
                 transformNode->getChildren()[0]->accept(this);
             }
             // TODO: can lights be attached to Transform node?
-            printf("in visitTransformNode before pop\n");
+            // printf("in visitTransformNode before pop\n");
             modelview.pop();
-            printf("in visitTransformNode after pop\n");
+            // printf("in visitTransformNode after pop\n");
         }
 
         void visitScaleTransform(ScaleTransform *scaleNode)
@@ -115,7 +118,7 @@ namespace sgraph
         }
 
     private:
-        stack<glm::mat4> modelview;
+        stack<glm::mat4> &modelview;
         util::ShaderLocationsVault shaderLocations;
         map<string, util::ObjectInstance *> objects;
         map<string, util::Light> lights;

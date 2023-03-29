@@ -3,55 +3,57 @@
 
 #include "IScenegraph.h"
 #include "SGNode.h"
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
 #include "IVertexData.h"
-#include "PolygonMesh.h"
+// #include "PolygonMesh.h"
 #include <string>
 #include <map>
 using namespace std;
 
-namespace sgraph {
+namespace sgraph
+{
 
   /**
- * A specific implementation of this scene graph. This implementation is still independent
- * of the rendering technology (i.e. OpenGL)
- * \author Amit Shesh
- */
+   * A specific implementation of this scene graph. This implementation is still independent
+   * of the rendering technology (i.e. OpenGL)
+   * \author Amit Shesh
+   */
 
-  class Scenegraph: public IScenegraph {
+  class Scenegraph : public IScenegraph
+  {
     /**
      * The root of the scene graph tree
      */
   protected:
     SGNode *root;
-    map<string,util::PolygonMesh<VertexAttrib> > meshes;
-    map<string,string> meshPaths;
-
+    map<string, util::PolygonMesh<VertexAttrib>> meshes;
+    map<string, string> meshPaths;
 
     /**
      * A map to store the (name,node) pairs. A map is chosen for efficient search
      */
-    map<string,SGNode *> nodes;
-    
+    map<string, SGNode *> nodes;
 
   public:
-    Scenegraph() {
+    Scenegraph()
+    {
       root = NULL;
     }
 
-    ~Scenegraph() {
+    ~Scenegraph()
+    {
       dispose();
     }
 
-    void dispose() {
+    void dispose()
+    {
 
-      if (root!=NULL) {
-          delete root;
-          root = NULL;
+      if (root != NULL)
+      {
+        delete root;
+        root = NULL;
       }
     }
-
-    
 
     /**
      * Set the root of the scenegraph, and then pass a reference to this scene graph object
@@ -59,44 +61,47 @@ namespace sgraph {
      * \param root
      */
 
-    void makeScenegraph(SGNode *root) {
+    void makeScenegraph(SGNode *root)
+    {
       this->root = root;
-      if (root!=NULL) {
+      if (root != NULL)
+      {
         this->root->setScenegraph(this);
       }
-
     }
 
-   
-
-    void addNode(const string& name, SGNode *node) {
-      nodes[name]=node;
+    void addNode(const string &name, SGNode *node)
+    {
+      nodes[name] = node;
     }
 
-
-    SGNode *getRoot() {
+    SGNode *getRoot()
+    {
       return root;
     }
 
-
-
-    map<string, SGNode *> getNodes() {
+    map<string, SGNode *> getNodes()
+    {
       return nodes;
     }
 
-    void setMeshes(map<string,util::PolygonMesh<VertexAttrib> >& meshes) {
+    void setMeshes(map<string, util::PolygonMesh<VertexAttrib>> &meshes)
+    {
       this->meshes = meshes;
     }
 
-    map<string,util::PolygonMesh<VertexAttrib> > getMeshes() {
+    map<string, util::PolygonMesh<VertexAttrib>> getMeshes()
+    {
       return this->meshes;
     }
 
-    void setMeshPaths(map<string,string>& meshPaths) {
+    void setMeshPaths(map<string, string> &meshPaths)
+    {
       this->meshPaths = meshPaths;
     }
 
-    map<string,string> getMeshPaths() {
+    map<string, string> getMeshPaths()
+    {
       return this->meshPaths;
     }
   };

@@ -178,5 +178,5 @@ void Controller::dispose()
 
 void Controller::error_callback(int error, const char *description)
 {
-    fprintf(stderr, "Error: %s\n", description);
+    // printf(stderr, "Error: %s\n", description);
 }

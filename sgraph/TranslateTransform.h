@@ -37,7 +37,7 @@ namespace sgraph
          */
         void accept(SGNodeVisitor *visitor)
         {
-            printf("in translatetransform node accept\n");
+            // printf("in translatetransform node accept\n");
             visitor->visitTranslateTransform(this);
         }
 

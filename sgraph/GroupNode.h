@@ -94,7 +94,7 @@ namespace sgraph
      */
     void accept(SGNodeVisitor *visitor)
     {
-      printf("in group node accept\n");
+      // printf("in group node accept\n");
       visitor->visitGroupNode(this);
     }
   };

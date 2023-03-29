@@ -14,7 +14,7 @@
 #include "RotateTransform.h"
 #include "ScaleTransform.h"
 #include "TranslateTransform.h"
-#include "PolygonMesh.h"
+// #include "PolygonMesh.h"
 #include "Material.h"
 #include <istream>
 #include <map>
@@ -202,7 +202,7 @@ namespace sgraph
                     ambient 0.611 0.349 0.207
                     diffuse 0.4 0.4 0.6
                     specular 0 0 0.8
-                    spot-direction 0 0 0 0
+                    spot-direction 0 0 0
                     spot-angle 23.0
                     end-light
             */
@@ -212,7 +212,7 @@ namespace sgraph
             float angle;
             string name;
             input >> name;
-            printf("\nlight: %s\n", name.c_str());
+            // printf("\nlight: %s\n", name.c_str());
             string command;
             input >> command;
             while (command != "end-light")
@@ -223,12 +223,14 @@ namespace sgraph
                           << "\nAMBIENT: " << light.getAmbient()
                           << "\nDIFFUSE: " << light.getDiffuse()
                           << "\nSPECULAR: " << light.getSpecular()
+                          << "\nSPOT-DIRECTION: " << light.getSpotDirection()
+                          << "\nSPOT-ANGLE: " << light.getSpotCutoff()
                           << "\n"
                           << std::endl;
                 if (command == "position")
                 {
                     input >> x >> y >> z;
-                    printf("pos: %f, %f, %f\n", x, y, z);
+                    // printf("pos: %f, %f, %f\n", x, y, z);
                     light.setPosition(x, y, z);
                     // light.setPosition(glm::vec4(x, y, z, 1.0f));
                     // std::cout << "AFTER INITIAL SETTING Parser.parseLight: lights[name]: " << name << ", pos: " << light.getPosition() << std::endl;
@@ -236,42 +238,44 @@ namespace sgraph
                 else if (command == "direction")
                 {
                     input >> x >> y >> z;
-                    printf("dir: %f, %f, %f\n", x, y, z);
+                    // printf("dir: %f, %f, %f\n", x, y, z);
                     light.setDirection(x, y, z);
                 }
                 else if (command == "ambient")
                 {
                     input >> r >> g >> b;
-                    printf("ambient: %f, %f, %f\n", r, g, b);
+                    // printf("ambient: %f, %f, %f\n", r, g, b);
                     light.setAmbient(r, g, b);
                     // std::cout << "AFTER INITIAL SETTING Parser.parseLight: lights[name]: " << name << ", ambient: " << light.getAmbient() << std::endl;
                 }
                 else if (command == "diffuse")
                 {
                     input >> r >> g >> b;
-                    printf("diffuse: %f, %f, %f\n", r, g, b);
+                    // printf("diffuse: %f, %f, %f\n", r, g, b);
                     light.setDiffuse(r, g, b);
                 }
                 else if (command == "specular")
                 {
                     input >> r >> g >> b;
-                    printf("specular: %f, %f, %f\n", r, g, b);
+                    // printf("specular: %f, %f, %f\n", r, g, b);
                     light.setSpecular(r, g, b);
                 }
                 else if (command == "spot-direction")
                 {
                     input >> x >> y >> z;
-                    printf("spot-direction: %f, %f, %f\n", x, y, z);
+                    // printf("spot-direction: %f, %f, %f\n", x, y, z);
                     light.setSpotDirection(x, y, z);
                 }
                 else if (command == "spot-angle")
                 {
                     input >> angle;
-                    printf("spot-angle: %f\n", angle);
+                    // printf("spot-angle: %f\n", angle);
                     light.setSpotAngle(angle);
+                    light.setIsSpotlight(true);
                 }
                 input >> command;
             }
+
             // std::cout << "BEFORE SETTING Parser.parseLight: light: " << name << ", pos: " << light.getPosition() << std::endl;
             // std::cout << "BEFORE SETTING Parser.parseLight: light: " << name << ", ambient: " << light.getAmbient() << std::endl;
             // std::cout << "BEFORE SETTING Parser.parseLight: light: " << name << ", diffuse: " << light.getDiffuse() << std::endl;
@@ -292,19 +296,19 @@ namespace sgraph
             SGNode *node = NULL;
             util::Light light;
 
-            printf("\nIN parseAttachLight, checking if nodename, lightname %s exists...\n", lightname.c_str());
-            printf("first element in lights %s\n", lights.begin()->first.c_str());
-            printf("first element in nodes %s\n", nodes.begin()->first.c_str());
+            // printf("\nIN parseAttachLight, checking if nodename, lightname %s exists...\n", lightname.c_str());
+            // printf("first element in lights %s\n", lights.begin()->first.c_str());
+            // printf("first element in nodes %s\n", nodes.begin()->first.c_str());
             if ((nodes.find(nodename) != nodes.end()) && (lights.find(lightname) != lights.end()))
             {
                 light = lights[lightname];
 
-                printf("found %s, attaching light...\n", lightname.c_str());
+                // printf("found %s, attaching light...\n", lightname.c_str());
                 // std::cout << light << endl;
                 std::cout << "parser.parseAttachLight(): pos: " << light.getPosition() << std::endl;
 
                 nodes[nodename]->attachLight(lightname, light);
-                printf("out from attachLight\n");
+                // printf("out from attachLight\n");
             }
         }
 

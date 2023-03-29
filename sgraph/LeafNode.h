@@ -107,7 +107,7 @@ namespace sgraph
          */
         void accept(SGNodeVisitor *visitor)
         {
-            printf("in leaf node accept\n");
+            // printf("in leaf node accept\n");
             visitor->visitLeafNode(this);
         }
     };

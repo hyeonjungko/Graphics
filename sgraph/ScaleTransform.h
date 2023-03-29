@@ -39,7 +39,7 @@ namespace sgraph
          */
         void accept(SGNodeVisitor *visitor)
         {
-            printf("in scaleTransform node accept\n");
+            // printf("in scaleTransform node accept\n");
             return visitor->visitScaleTransform(this);
         }
 
