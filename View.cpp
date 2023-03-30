@@ -10,6 +10,8 @@ using namespace std;
 #include "sgraph/ScenegraphLightPosCalculator.h"
 // #include "VertexAttrib.h"
 
+#include "glm/gtx/string_cast.hpp" // TODO: added just for printing
+
 View::View()
 {
 }
@@ -68,7 +70,6 @@ void View::init(Callbacks *callbacks, Model &model)
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1);
 
-    // TODO:
     // program.createProgram(string("shaders/phong-multiple.vert"), string("shaders/phong-multiple.frag"));
     // program.createProgram(string("shaders/phong-multiple-light-only.vert"), string("shaders/phong-multiple-light-only.frag"));
     program.createProgram(string("shaders/phong-multiple-with-texture-spotlights.vert"), string("shaders/phong-multiple-with-texture-spotlights.frag"));
@@ -96,8 +97,13 @@ void View::init(Callbacks *callbacks, Model &model)
         objects[it->first] = obj;
     }
 
+    printf("before renderer initialization\n");
     renderer = new sgraph::GLScenegraphRenderer(modelview, objects, shaderLocations);
+    printf("after renderer initialization\n");
+
+    printf("before lightPosCalculator initialization\n");
     lightPosCalculator = new sgraph::ScenegraphLightPosCalculator(modelview);
+    printf("after lightPosCalculator initialization\n");
     // // printf("\nbefore light position calculations\n");
     // calculateLightPos(scenegraph);
     // // printf("\nafter light position calculations\n");
@@ -123,9 +129,6 @@ void View::init(Callbacks *callbacks, Model &model)
     ; // assume person's eyes are at head height
     personDirection = glm::vec3(0.0f, 10.0f, 100.0f);
     personUp = glm::vec3(0.0f, 1.0f, 0.0f); // assume person's up direction is positive y-axis
-
-    // get input variables that need to be given to the shader program
-    initLightShaderVars();
 }
 
 // void View::calculateLightPos(sgraph::IScenegraph *scenegraph) // TODO: on't need this
@@ -160,16 +163,19 @@ void View::initLightShaderVars()
 
 void View::display(sgraph::IScenegraph *scenegraph)
 {
+    printf("in view display now\n");
     program.enable();
     // glClearColor(0, 0, 0, 1);
     glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
-    while (!modelview.empty())
-    {
-        modelview.pop();
-    }
+    printf("emptying out modelview\n");
+    // while (!modelview.empty())
+    // {
+    //     modelview.pop();
+    // }
+    printf("finished emptying out modelview\n");
 
     modelview.push(glm::mat4(1.0));
 
@@ -212,19 +218,27 @@ void View::display(sgraph::IScenegraph *scenegraph)
     // LIGHTS
     //////////////////////////
     // calculate light positions & spotlight directions
+    printf("before light pos calculations\n");
     scenegraph->getRoot()->accept(lightPosCalculator);
+    printf("after light pos calculations\n");
     lights = lightPosCalculator->getScenegraphLights();
+    printf("now there are %i lights in View\n", lights.size());
+
+    // get input variables that need to be given to the shader program
+    initLightShaderVars();
 
     // draw lights
     glEnable(GL_LIGHTING);
     for (int i = 0; i < lights.size(); i++)
     {
+        printf("\ngot here\n");
         glm::vec4 pos = lights[i].getPosition();
-        glm::mat4 lightTransformation = modelview.top();
-        pos = lightTransformation * pos;
+        cout << "fetched light pos: " << pos << endl;
+        cout << lightLocations.size() << endl;
 
         glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
     }
+    printf("\nalso got here\n");
 
     // pass light color properties to shader
     glUniform1i(shaderLocations.getLocation("numLights"), lights.size());

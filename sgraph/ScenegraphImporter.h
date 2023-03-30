@@ -14,12 +14,14 @@
 #include "RotateTransform.h"
 #include "ScaleTransform.h"
 #include "TranslateTransform.h"
-// #include "PolygonMesh.h"
 #include "Material.h"
 #include <istream>
 #include <map>
 #include <string>
 #include <iostream>
+
+#include <glm/gtx/string_cast.hpp> //
+
 using namespace std;
 
 namespace sgraph
@@ -217,22 +219,13 @@ namespace sgraph
             input >> command;
             while (command != "end-light")
             {
-                std::cout << "\nParser.parseLight WHILE LOOP: \nname: "
-                          << name
-                          << "\nPOSITION: " << light.getPosition()
-                          << "\nAMBIENT: " << light.getAmbient()
-                          << "\nDIFFUSE: " << light.getDiffuse()
-                          << "\nSPECULAR: " << light.getSpecular()
-                          << "\nSPOT-DIRECTION: " << light.getSpotDirection()
-                          << "\nSPOT-ANGLE: " << light.getSpotCutoff()
-                          << "\n"
-                          << std::endl;
                 if (command == "position")
                 {
                     input >> x >> y >> z;
                     // printf("pos: %f, %f, %f\n", x, y, z);
                     light.setPosition(x, y, z);
                     // light.setPosition(glm::vec4(x, y, z, 1.0f));
+                    printf("in parser, returned from setting light position");
                     // std::cout << "AFTER INITIAL SETTING Parser.parseLight: lights[name]: " << name << ", pos: " << light.getPosition() << std::endl;
                 }
                 else if (command == "direction")
@@ -273,6 +266,18 @@ namespace sgraph
                     light.setSpotAngle(angle);
                     light.setIsSpotlight(true);
                 }
+
+                std::cout << "\nParser.parseLight WHILE LOOP: \nname: "
+                          << name
+                          << "\nPOSITION: " << light.getPosition()
+                          << "\nAMBIENT: " << light.getAmbient()
+                          << "\nDIFFUSE: " << light.getDiffuse()
+                          << "\nSPECULAR: " << light.getSpecular()
+                          << "\nSPOT-DIRECTION: " << light.getSpotDirection()
+                          << "\nSPOT-ANGLE: " << light.getSpotCutoff()
+                          << "\n"
+                          << std::endl;
+
                 input >> command;
             }
 
@@ -305,7 +310,8 @@ namespace sgraph
 
                 // printf("found %s, attaching light...\n", lightname.c_str());
                 // std::cout << light << endl;
-                std::cout << "parser.parseAttachLight(): pos: " << light.getPosition() << std::endl;
+                printf("in parseAttachLight\n");
+                // std::cout << "parser.parseAttachLight(): pos: " << light.getPosition() << std::endl;
 
                 nodes[nodename]->attachLight(lightname, light);
                 // printf("out from attachLight\n");

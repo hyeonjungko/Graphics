@@ -43,6 +43,7 @@ void Controller::initScenegraph()
          << "\n";
 
     IScenegraph *scenegraph = importer.parse(inFile);
+    printf("\nfinished importing txt file\n");
     model.setScenegraph(scenegraph);
 }
 
@@ -128,7 +129,6 @@ void Controller::onmouse(int button, int action, int mods)
             {
                 model.leftMouseReleased();
             }
-            //  TODO: may have to do additional logic in model to stop rotation once mouse is released
         }
         else if (action == GLFW_PRESS)
         {

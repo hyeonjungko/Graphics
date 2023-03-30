@@ -26,7 +26,7 @@ ambient 0.8 0.8 0.8
 diffuse 0.7 0.7 0.7
 specular 0.8 0.8 0.8
 spot-angle 15.0
-spot-direction 0 0 -1 # TODO: Q: should spotlights have a default spot-direction?
+spot-direction 0 0 -1
 end-light
 
 #texture image

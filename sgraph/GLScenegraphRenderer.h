@@ -42,6 +42,7 @@ namespace sgraph
             {
                 cout << "Mesh with name: " << it->first << endl;
             }
+            printf("constructor: finished initializing renderer\n");
         }
 
         /**

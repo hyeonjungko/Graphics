@@ -73,7 +73,6 @@ void main()
     {
         ///////////////////////////////
         // NEW & IMPROVED 
-        // TODO: not currently working...
 
         if (light[i].isSpotlight) {
             // //
