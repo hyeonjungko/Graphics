@@ -1,4 +1,4 @@
-
+# Lighting and Texture Mapping
 ## Running the Program
 
   ```

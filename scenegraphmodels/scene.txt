@@ -6,10 +6,20 @@ texture-image checkerboard textures/checkerboard.ppm
 
 #light1
 light light1
-position 0 0 80
-ambient 0 0.3 0.3
+position 0 120 0
+ambient 0.9 0.9 0.9
 diffuse 0.5 0.5 0.5
 specular 0.5 0.5 0.5
+end-light
+
+#light2
+light light2
+position 0 100 30
+ambient 0 0.8 0.8
+diffuse 0.7 0.7 0.7
+specular 0.8 0.8 0.8
+spot-angle 23.0
+spot-direction 0 -1 0
 end-light
 
 # materials
@@ -27,6 +37,7 @@ end-material
 
 group main-root main-root
 attach-light main-root light1
+attach-light main-root light2
 
 # translate box-building-2
 translate translate-box-building-2 translate-box-building-2 -70 0 60
@@ -37,7 +48,7 @@ add-child rotate-box-building-2 translate-box-building-2
 
 # create box-building-2 with import
 import box-building-2 scenegraphmodels/building2.txt
-assign-material box-building-2 checkerboard
+#assign-material box-building-2 checkerboard
 add-child box-building-2 rotate-box-building-2
 
 # translate box-building-1
@@ -49,7 +60,7 @@ add-child rotate-box-building-1 translate-box-building-1
 
 # create box-building-1 with import
 import box-building-1 scenegraphmodels/building1.txt
-assign-material box-building-1 checkerboard
+#assign-material box-building-1 checkerboard
 add-child box-building-1 rotate-box-building-1
 
 group root-1 root-1
@@ -69,7 +80,7 @@ add-child rotate-humanoid-2 scale-humanoid-2
 
 # create humanoid-2 with import
 import humanoid-2 scenegraphmodels/humanoid-front-lat-spread.txt
-assign-material humanoid-2 checkerboard
+#assign-material humanoid-2 checkerboard
 add-child humanoid-2 rotate-humanoid-2
 
 # translate humanoid-1 & attach to root-1
@@ -86,7 +97,7 @@ add-child rotate-humanoid-1 scale-humanoid-1
 
 # create humanoid-1 with import
 import humanoid-1 scenegraphmodels/humanoid-front-double-biceps.txt
-assign-material humanoid-1 checkerboard
+#assign-material humanoid-1 checkerboard
 add-child humanoid-1 rotate-humanoid-1
 
 # scale base
@@ -127,7 +138,7 @@ add-child scale-building-2 translate-building-2
 
 # create building-2 and attach to the main building
 leaf leaf-building-2 leaf-building-2 instanceof box
-assign-material leaf-building-2 mat-building-2
+#assign-material leaf-building-2 mat-building-2
 assign-texture leaf-building-2 checkerboard
 add-child leaf-building-2 scale-building-2
 
