@@ -39,12 +39,22 @@ namespace sgraph
         {
             this->objInstanceName = instanceOf;
             this->material = material;
+
+            ImageLoader *loader = new PPMImageLoader();
+            loader->load("textures/all-white.ppm");
+            util::TextureImage *textureObject = new util::TextureImage(loader->getPixels(), loader->getWidth(), loader->getHeight(), "all-white");
+            this->texture = textureObject;
         }
 
         LeafNode(const string &instanceOf, const string &name, sgraph::IScenegraph *graph)
             : AbstractSGNode(name, graph)
         {
             this->objInstanceName = instanceOf;
+
+            ImageLoader *loader = new PPMImageLoader();
+            loader->load("textures/all-white.ppm");
+            util::TextureImage *textureObject = new util::TextureImage(loader->getPixels(), loader->getWidth(), loader->getHeight(), "all-white");
+            this->texture = textureObject;
         }
 
         ~LeafNode() {}

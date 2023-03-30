@@ -31,14 +31,17 @@ end-light
 
 #texture image
 texture-image checkerboard textures/checkerboard.ppm
+texture-image sand textures/sand.ppm
 
 # leaf nodes
 leaf box-leaf one-box instanceof box 
 assign-texture box-leaf checkerboard
+#assign-texture box-leaf sand
 assign-material box-leaf mat-node-3-0
 
 leaf sphere-leaf one-sphere instanceof sphere
 assign-texture sphere-leaf checkerboard
+#assign-texture sphere-leaf curves
 assign-material sphere-leaf mat-node-3-0
 
 #the root

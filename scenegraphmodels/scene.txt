@@ -1,6 +1,17 @@
 instance box models/box.obj
 instance cylinder models/cylinder.obj
 
+#texture image
+texture-image checkerboard textures/checkerboard.ppm
+
+#light1
+light light1
+position 0 0 80
+ambient 0 0.3 0.3
+diffuse 0.5 0.5 0.5
+specular 0.5 0.5 0.5
+end-light
+
 # materials
 material mat-building
 ambient 0.768 0.407 0.407
@@ -15,6 +26,7 @@ ambient 0.258 0.658 0.356
 end-material
 
 group main-root main-root
+attach-light main-root light1
 
 # translate box-building-2
 translate translate-box-building-2 translate-box-building-2 -70 0 60
@@ -25,6 +37,7 @@ add-child rotate-box-building-2 translate-box-building-2
 
 # create box-building-2 with import
 import box-building-2 scenegraphmodels/building2.txt
+assign-material box-building-2 checkerboard
 add-child box-building-2 rotate-box-building-2
 
 # translate box-building-1
@@ -36,6 +49,7 @@ add-child rotate-box-building-1 translate-box-building-1
 
 # create box-building-1 with import
 import box-building-1 scenegraphmodels/building1.txt
+assign-material box-building-1 checkerboard
 add-child box-building-1 rotate-box-building-1
 
 group root-1 root-1
@@ -55,6 +69,7 @@ add-child rotate-humanoid-2 scale-humanoid-2
 
 # create humanoid-2 with import
 import humanoid-2 scenegraphmodels/humanoid-front-lat-spread.txt
+assign-material humanoid-2 checkerboard
 add-child humanoid-2 rotate-humanoid-2
 
 # translate humanoid-1 & attach to root-1
@@ -71,6 +86,7 @@ add-child rotate-humanoid-1 scale-humanoid-1
 
 # create humanoid-1 with import
 import humanoid-1 scenegraphmodels/humanoid-front-double-biceps.txt
+assign-material humanoid-1 checkerboard
 add-child humanoid-1 rotate-humanoid-1
 
 # scale base
@@ -80,6 +96,7 @@ add-child scalebase root-1
 # create base left node
 leaf base base instanceof box
 assign-material base mat-base
+assign-texture base checkerboard
 add-child base scalebase
 
 # create group node building
@@ -97,6 +114,7 @@ add-child scale-main-building translate-main-building
 # create main building & attach to scale main building
 leaf main-building main-building instanceof box
 assign-material main-building mat-building
+assign-texture main-building checkerboard
 add-child main-building scale-main-building
 
 # translate building-2
@@ -107,9 +125,10 @@ add-child translate-building-2 building
 scale scale-building-2 scale-building-2 30 30 30
 add-child scale-building-2 translate-building-2
 
-# create building-2 and attach to the main buidling
+# create building-2 and attach to the main building
 leaf leaf-building-2 leaf-building-2 instanceof box
 assign-material leaf-building-2 mat-building-2
+assign-texture leaf-building-2 checkerboard
 add-child leaf-building-2 scale-building-2
 
 # translate turret-4
@@ -118,6 +137,7 @@ add-child translate-turret-4 building
 
 # create turret-4 with import
 import turret-4 scenegraphmodels/turret.txt
+assign-material turret-4 checkerboard
 add-child turret-4 translate-turret-4
 
 # translate turret-3
@@ -126,6 +146,7 @@ add-child translate-turret-3 building
 
 # create turret-3 with import
 import turret-3 scenegraphmodels/turret.txt
+assign-material turret-3 checkerboard
 add-child turret-3 translate-turret-3
 
 # translate turret-2
@@ -134,6 +155,7 @@ add-child translate-turret-2 building
 
 # create turret-2 with import
 import turret-2 scenegraphmodels/turret.txt
+assign-material turret-2 checkerboard
 add-child turret-2 translate-turret-2
 
 # translate turret
@@ -142,6 +164,7 @@ add-child translate-turret-1 building
 
 # create turret-1 with import
 import turret-1 scenegraphmodels/turret.txt
+assign-material turret-1 checkerboard
 add-child turret-1 translate-turret-1
 
 assign-root main-root
