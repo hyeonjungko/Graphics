@@ -15,10 +15,6 @@ Model::~Model()
     }
 }
 
-// TODO:
-// if left mouse is currently being pressed,
-// use current cursor position to calculate delta from prev mouse pos
-// use that delta to rotate (further calculations probably needed to calculate the axis of rotation...)
 bool Model::getIsLeftMousePressed()
 {
     return isLeftMousePressed;

@@ -1,0 +1,63 @@
+#all the instances
+instance box models/box-outside.obj
+instance sphere models/sphere.obj
+
+#material
+material mat-node-3-0
+emission 0 0 0
+ambient 0.3 0.3 0.3
+diffuse 0.7 0.7 0.7
+specular 0.7 0.7 0.7
+shininess 100
+end-material
+
+#light1
+light light1
+position 0 0 80
+ambient 0 0.3 0.3
+diffuse 0.5 0.5 0.5
+specular 0.5 0.5 0.5
+end-light
+
+#light2
+light light2
+position 0 0 100
+ambient 0.8 0.8 0.8
+diffuse 0.7 0.7 0.7
+specular 0.8 0.8 0.8
+spot-angle 15.0
+spot-direction 0 0 -1
+end-light
+
+#texture image
+texture-image checkerboard textures/checkerboard.ppm
+
+# leaf nodes
+leaf box-leaf one-box instanceof box 
+assign-texture box-leaf checkerboard
+assign-material box-leaf mat-node-3-0
+
+leaf sphere-leaf one-sphere instanceof sphere
+assign-texture sphere-leaf checkerboard
+assign-material sphere-leaf mat-node-3-0
+
+#the root
+group node-1-0 root
+assign-root node-1-0
+#attach-light node-1-0 light1
+attach-light node-1-0 light2
+#attach-light sphere-leaf light2
+
+scale scale-all scale 60 60 60
+group group-objs group-objs
+translate box-translate box-translate 0 0 0
+translate sphere-translate sphere-translate 0 0 0
+
+add-child scale-all node-1-0
+add-child group-objs scale-all
+add-child box-translate group-objs
+#add-child sphere-translate group-objs
+
+add-child box-leaf box-translate
+add-child sphere-leaf sphere-translate
+

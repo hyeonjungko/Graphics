@@ -43,7 +43,7 @@ void Controller::initScenegraph()
          << "\n";
 
     IScenegraph *scenegraph = importer.parse(inFile);
-    // scenegraph->setMeshes(meshes);
+    printf("\nfinished importing txt file\n");
     model.setScenegraph(scenegraph);
 }
 
@@ -54,14 +54,9 @@ Controller::~Controller()
 void Controller::run()
 {
     sgraph::IScenegraph *scenegraph = model.getScenegraph();
-    map<string, util::PolygonMesh<VertexAttrib>> meshes = scenegraph->getMeshes();
-    view.init(this, meshes);
-
-    // sgraph::IScenegraph *scenegraph = model.getScenegraph();
-    // map<string, string> meshPaths = scenegraph->getMeshPaths();                  //
-    // sgraph::SGNodeVisitor *exporter = new sgraph::ScenegraphExporter(meshPaths); //
-    // scenegraph->getRoot()->accept(exporter);
-    // exporter->getOutput(); // can't call derived class functions from base class. must write another visitor
+    // map<string, util::PolygonMesh<VertexAttrib>> meshes = scenegraph->getMeshes();
+    // view.init(this, meshes);
+    view.init(this, model);
 
     while (!view.shouldWindowClose())
     {
@@ -134,7 +129,6 @@ void Controller::onmouse(int button, int action, int mods)
             {
                 model.leftMouseReleased();
             }
-            //  TODO: may have to do additional logic in model to stop rotation once mouse is released
         }
         else if (action == GLFW_PRESS)
         {
@@ -184,5 +178,5 @@ void Controller::dispose()
 
 void Controller::error_callback(int error, const char *description)
 {
-    fprintf(stderr, "Error: %s\n", description);
+    // printf(stderr, "Error: %s\n", description);
 }

@@ -11,65 +11,67 @@ using namespace std;
 namespace sgraph
 {
   /**
- * This class represents a group node in the scenegraph. A group node is simply a logical grouping
- * of other nodes. It can have an arbitrary number of children. Its children can be nodes of any type
- * \author Amit Shesh
- */
-  class GroupNode:public ParentSGNode {
+   * This class represents a group node in the scenegraph. A group node is simply a logical grouping
+   * of other nodes. It can have an arbitrary number of children. Its children can be nodes of any type
+   * \author Amit Shesh
+   */
+  class GroupNode : public ParentSGNode
+  {
 
   protected:
-    ParentSGNode *copyNode() {
-      return new GroupNode(name,scenegraph);
+    ParentSGNode *copyNode()
+    {
+      return new GroupNode(name, scenegraph);
     }
-    
 
   public:
-    GroupNode(const string& name,sgraph::IScenegraph *graph)
-      :ParentSGNode(name,graph) {      
-    }
-	
-    ~GroupNode() {
-      
+    GroupNode(const string &name, sgraph::IScenegraph *graph)
+        : ParentSGNode(name, graph)
+    {
     }
 
-    
+    ~GroupNode()
+    {
+    }
 
     /**
      * Sets the reference to the scene graph object for this node, and then recurses down
      * to children for the same
      * \param graph a reference to the scenegraph object of which this tree is a part
      */
-    void setScenegraph(sgraph::IScenegraph *graph) {
+    void setScenegraph(sgraph::IScenegraph *graph)
+    {
       AbstractSGNode::setScenegraph(graph);
-      for (int i=0;i<children.size();i++)
+      for (int i = 0; i < children.size(); i++)
       {
         children[i]->setScenegraph(graph);
       }
     }
 
-    
     /**
      * Makes a deep copy of the subtree rooted at this node
      * \return a deep copy of the subtree rooted at this node
      */
-    SGNode *clone() {
+    SGNode *clone()
+    {
       vector<SGNode *> newc;
 
-      for (int i=0;i<children.size();i++) {
-          newc.push_back(children[i]->clone());
+      for (int i = 0; i < children.size(); i++)
+      {
+        newc.push_back(children[i]->clone());
       }
 
-      GroupNode *newgroup = new GroupNode(name,scenegraph);
+      GroupNode *newgroup = new GroupNode(name, scenegraph);
 
-      for (int i=0;i<children.size();i++) {
-          try
-          {
-            newgroup->addChild(newc[i]);
-          }
-          catch (runtime_error e)
-          {
-
-          }
+      for (int i = 0; i < children.size(); i++)
+      {
+        try
+        {
+          newgroup->addChild(newc[i]);
+        }
+        catch (runtime_error e)
+        {
+        }
       }
       return newgroup;
     }
@@ -80,17 +82,19 @@ namespace sgraph
      * \param child
      * \throws runtime_error this class does not throw this exception
      */
-    void addChild(SGNode *child) {
+    void addChild(SGNode *child)
+    {
       children.push_back(child);
       child->setParent(this);
     }
 
-    
     /**
      * Visit this node.
-     * 
+     *
      */
-    void accept(SGNodeVisitor* visitor) {
+    void accept(SGNodeVisitor *visitor)
+    {
+      // printf("in group node accept\n");
       visitor->visitGroupNode(this);
     }
   };
