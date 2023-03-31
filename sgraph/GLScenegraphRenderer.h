@@ -78,8 +78,8 @@ namespace sgraph
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // if the s-coordinate goes outside (0,1), repeat it
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // if the t-coordinate goes outside (0,1), repeat it
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureObject->getWidth(), textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, textureObject->getImage());
             glGenerateMipmap(GL_TEXTURE_2D);
             glBindTexture(GL_TEXTURE_2D, textureId);
@@ -109,6 +109,9 @@ namespace sgraph
             glUniform3fv(shaderLocations.getLocation("material.diffuse"), 1, glm::value_ptr(leafNode->getMaterial().getDiffuse()));
             glUniform3fv(shaderLocations.getLocation("material.specular"), 1, glm::value_ptr(leafNode->getMaterial().getSpecular()));
             glUniform1f(shaderLocations.getLocation("material.shininess"), leafNode->getMaterial().getShininess());
+            cout << "mat ambient" << leafNode->getMaterial().getAmbient() << endl;
+            cout << "mat diffuse" << leafNode->getMaterial().getDiffuse() << endl;
+            cout << "mat spec" << leafNode->getMaterial().getSpecular() << endl;
 
             objects[leafNode->getInstanceOf()]->draw();
         }

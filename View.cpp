@@ -252,7 +252,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
         glUniform3fv(lightLocations[i].specular, 1, glm::value_ptr(lights[i].getSpecular()));
         glUniform3fv(lightLocations[i].spotDirection, 1, glm::value_ptr(lights[i].getSpotDirection()));
         glUniform1f(lightLocations[i].spotAngle, cos(glm::radians(lights[i].getSpotCutoff()))); // sending cosine of angle to shader
-        glUniform1i(lightLocations[i].isSpotlight, lights[i].getIsSpotlight());                 // sending cosine of angle to shader
+        glUniform1i(lightLocations[i].isSpotlight, lights[i].getIsSpotlight());
     }
 
     // draw scene graph here
@@ -271,6 +271,8 @@ void View::display(sgraph::IScenegraph *scenegraph)
         frames = 0;
         time = currenttime;
     }
+
+    lightLocations.clear();
 
     /*
     void drawSpotlight(float posX, float posY, float posZ, float dirX, float dirY, float dirZ, float cutoffAngle, float exponent, float r, float g, float b)

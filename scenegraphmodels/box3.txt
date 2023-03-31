@@ -5,7 +5,7 @@ instance sphere models/sphere.obj
 #material
 material mat-node-3-0
 emission 0 0 0
-ambient 0.3 0.3 0.3
+ambient 0.5 0.5 0.5
 diffuse 0.7 0.7 0.7
 specular 0.7 0.7 0.7
 shininess 100
@@ -13,16 +13,16 @@ end-material
 
 #light1
 light light1
-position 0 0 80
-ambient 0 0.3 0.3
-diffuse 0.5 0.5 0.5
-specular 0.5 0.5 0.5
+position 0 70 0
+ambient 1 1 1
+diffuse 0 0 0
+specular 0 0 0
 end-light
 
 #light2
 light light2
 position 0 0 100
-ambient 0.8 0.8 0.8
+ambient 0 0.8 0.8
 diffuse 0.7 0.7 0.7
 specular 0.8 0.8 0.8
 spot-angle 15.0
@@ -31,21 +31,25 @@ end-light
 
 #texture image
 texture-image checkerboard textures/checkerboard.ppm
+texture-image sand textures/sand.ppm
 
 # leaf nodes
 leaf box-leaf one-box instanceof box 
 assign-texture box-leaf checkerboard
+#assign-texture box-leaf sand
 assign-material box-leaf mat-node-3-0
 
 leaf sphere-leaf one-sphere instanceof sphere
-assign-texture sphere-leaf checkerboard
+#assign-texture sphere-leaf checkerboard
+#assign-texture sphere-leaf curves
 assign-material sphere-leaf mat-node-3-0
 
 #the root
 group node-1-0 root
 assign-root node-1-0
-#attach-light node-1-0 light1
-attach-light node-1-0 light2
+attach-light node-1-0 light1
+#attach-light node-1-0 light2
+
 #attach-light sphere-leaf light2
 
 scale scale-all scale 60 60 60

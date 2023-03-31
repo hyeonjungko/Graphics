@@ -25,6 +25,7 @@ namespace sgraph
          * The name of the object instance that this leaf contains. All object instances are stored
          * in the scene graph itself, so that an instance can be reused in several leaves
          */
+
     protected:
         string objInstanceName;
         /**
@@ -39,12 +40,25 @@ namespace sgraph
         {
             this->objInstanceName = instanceOf;
             this->material = material;
+
+            ImageLoader *loader = new PPMImageLoader();
+            loader->load("textures/all-white.ppm");
+            util::TextureImage *textureObject = new util::TextureImage(loader->getPixels(), loader->getWidth(), loader->getHeight(), "all-white");
+            this->texture = textureObject;
         }
 
         LeafNode(const string &instanceOf, const string &name, sgraph::IScenegraph *graph)
             : AbstractSGNode(name, graph)
         {
             this->objInstanceName = instanceOf;
+
+            ImageLoader *loader = new PPMImageLoader();
+            loader->load("textures/all-white.ppm");
+            util::TextureImage *textureObject = new util::TextureImage(loader->getPixels(), loader->getWidth(), loader->getHeight(), "all-white");
+            this->texture = textureObject;
+
+            // empty default material
+            this->material = util::Material();
         }
 
         ~LeafNode() {}
