@@ -3,19 +3,21 @@ instance cylinder models/cylinder.obj
 
 #texture image
 texture-image checkerboard textures/checkerboard.ppm
+texture-image pexels textures/pexels-anni-roenkae-2832432.ppm
+texture-image meow textures/abstract.ppm
 
 #light1
 light light1
-position 0 120 0
+position 0 100 0
 ambient 0.9 0.9 0.9
-diffuse 0.5 0.5 0.5
-specular 0.5 0.5 0.5
+diffuse 0.9 0.9 0.9
+specular 0.9 0.9 0.9
 end-light
 
 #light2
 light light2
 position 0 100 30
-ambient 0 0.8 0.8
+ambient 0.8 0 0.8
 diffuse 0.7 0.7 0.7
 specular 0.8 0.8 0.8
 spot-angle 23.0
@@ -107,7 +109,7 @@ add-child scalebase root-1
 # create base left node
 leaf base base instanceof box
 assign-material base mat-base
-assign-texture base checkerboard
+assign-texture base pexels
 add-child base scalebase
 
 # create group node building
@@ -125,7 +127,7 @@ add-child scale-main-building translate-main-building
 # create main building & attach to scale main building
 leaf main-building main-building instanceof box
 assign-material main-building mat-building
-assign-texture main-building checkerboard
+assign-texture main-building meow
 add-child main-building scale-main-building
 
 # translate building-2
@@ -139,7 +141,7 @@ add-child scale-building-2 translate-building-2
 # create building-2 and attach to the main building
 leaf leaf-building-2 leaf-building-2 instanceof box
 #assign-material leaf-building-2 mat-building-2
-assign-texture leaf-building-2 checkerboard
+assign-texture leaf-building-2 meow
 add-child leaf-building-2 scale-building-2
 
 # translate turret-4

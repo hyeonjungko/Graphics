@@ -4,10 +4,16 @@ instance cylinder models/cylinder.obj
 # materials
 material mat-building
 ambient 0.19 0.286 0.47
+diffuse 1 1 1
+specular 1 1 1
+shininess 80
 end-material
 
 material mat-roof
 ambient 0.98 0.729 0.012
+diffuse 1 1 1
+specular 1 1 1
+shininess 80
 end-material
 
 
