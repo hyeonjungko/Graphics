@@ -228,7 +228,6 @@ void View::display(sgraph::IScenegraph *scenegraph)
     initLightShaderVars();
 
     // draw lights
-    glEnable(GL_LIGHTING);
     for (int i = 0; i < lights.size(); i++)
     {
         printf("\ngot here\n");

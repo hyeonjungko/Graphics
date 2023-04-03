@@ -109,7 +109,7 @@ void main()
                 fColor = fColor + color;
                 // fColor = color;
                 //fColor = fColor + vec4(ambient + spotLightIntensity * (diffuse + specular), 1.0); //
-                // fColor = fColor + color * spotLightIntensity;
+                //fColor = fColor + color * spotLightIntensity;
             }
         }
         else {
@@ -117,7 +117,7 @@ void main()
         }
         ///////////////////////////////
     }
-    // fColor = texture(image,fTexCoord.st);
+    //fColor = texture(image,fTexCoord.st);
     fColor = fColor * texture(image,fTexCoord.st);
     // fColor = vec4(fTexCoord.s,fTexCoord.t,0,1);
 

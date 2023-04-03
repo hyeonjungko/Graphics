@@ -8,7 +8,7 @@ texture-image meow textures/abstract.ppm
 
 #light1
 light light1
-position 0 100 0
+position 0 50 0
 ambient 0.9 0.9 0.9
 diffuse 0.9 0.9 0.9
 specular 0.9 0.9 0.9
@@ -17,24 +17,33 @@ end-light
 #light2
 light light2
 position 0 100 30
-ambient 0.8 0 0.8
-diffuse 0.7 0.7 0.7
-specular 0.8 0.8 0.8
+ambient 0 0.9 0.8
+diffuse 0 0.9 0.8
+specular 0 0.9 0.8
 spot-angle 23.0
 spot-direction 0 -1 0
 end-light
 
 # materials
 material mat-building
-ambient 0.768 0.407 0.407
+ambient 0.8 0 0.8
+diffuse 0.8 0 0.8
+specular 0.8 0 0.8
+shininess 10
 end-material
 
 material mat-building-2
-ambient 0.368 0. 785 0.345
+ambient 0.8 0 0.8
+diffuse 0.8 0 0.8
+specular 0.8 0 0.8
+shininess 10
 end-material
 
 material mat-base
-ambient 0.258 0.658 0.356
+ambient 0.8 0 0.8
+diffuse 0.8 0 0.8
+specular 0.8 0 0.8
+shininess 10
 end-material
 
 group main-root main-root
