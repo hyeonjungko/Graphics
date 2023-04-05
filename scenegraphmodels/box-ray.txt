@@ -12,7 +12,7 @@ end-material
 
 #the root
 group node-1-0 root
-scale node-2-0 scale 10 10 10
+scale node-2-0 scale 70 70 70
 leaf node-3-0 one-box instanceof box 
 
 

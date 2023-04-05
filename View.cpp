@@ -70,11 +70,8 @@ void View::init(Callbacks *callbacks, Model &model)
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1);
 
-    // program.createProgram(string("shaders/phong-multiple.vert"), string("shaders/phong-multiple.frag"));
-    // program.createProgram(string("shaders/phong-multiple-light-only.vert"), string("shaders/phong-multiple-light-only.frag"));
     program.createProgram(string("shaders/phong-multiple-with-texture-spotlights.vert"), string("shaders/phong-multiple-with-texture-spotlights.frag"));
-    //  assuming it got created, get all the shader variables that it uses
-    //  so we can initialize them at some point
+
     //  enable the shader program
     program.enable();
     shaderLocations = program.getAllShaderVariables();
@@ -104,9 +101,6 @@ void View::init(Callbacks *callbacks, Model &model)
     printf("before lightPosCalculator initialization\n");
     lightPosCalculator = new sgraph::ScenegraphLightPosCalculator(modelview);
     printf("after lightPosCalculator initialization\n");
-    // // printf("\nbefore light position calculations\n");
-    // calculateLightPos(scenegraph);
-    // // printf("\nafter light position calculations\n");
 
     int window_width, window_height;
     aspectRatio = (float)window_width / window_height;
@@ -130,16 +124,6 @@ void View::init(Callbacks *callbacks, Model &model)
     personDirection = glm::vec3(0.0f, 10.0f, 100.0f);
     personUp = glm::vec3(0.0f, 1.0f, 0.0f); // assume person's up direction is positive y-axis
 }
-
-// void View::calculateLightPos(sgraph::IScenegraph *scenegraph) // TODO: on't need this
-// {
-//     sgraph::ScenegraphLightPosCalculator *lightPosCalc = new sgraph::ScenegraphLightPosCalculator();
-//     // printf("\nin calculateLightPos before light pos calc visitor visits\n");
-//     scenegraph->getRoot()->accept(lightPosCalc);
-//     lights = lightPosCalc->getScenegraphLights();
-//     // printf("\nin calculateLightPos after light pos calc visitor visits\n");
-//     // printf("%d lights in scene\n", lights.size());
-// }
 
 void View::initLightShaderVars()
 {
@@ -170,13 +154,6 @@ void View::display(sgraph::IScenegraph *scenegraph)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
-    printf("emptying out modelview\n");
-    // while (!modelview.empty())
-    // {
-    //     modelview.pop();
-    // }
-    printf("finished emptying out modelview\n");
-
     modelview.push(glm::mat4(1.0));
 
     if (cameraMode == GLOBAL)
@@ -199,10 +176,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
     }
     else if (cameraMode == FPS)
     {
-        // glm::vec3 eyePosition = personEyePosition +  glm::vec3(0.0f, 0.0f, 1.0f) * -10.0f;
-        // personEyePosition =  // offset the eye position in the direction the person is facing
         modelview.top() = modelview.top() * glm::lookAt(personEyePosition, personDirection, personUp);
-        // modelview.push(modelview.top());
         modelview.top() = modelview.top() *
                           glm::rotate(glm::mat4(1.0), glm::radians(left), glm::vec3(0.0f, 1.0f, 0.0f)) *
                           glm::rotate(glm::mat4(1.0), glm::radians(up), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -216,7 +190,6 @@ void View::display(sgraph::IScenegraph *scenegraph)
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
     // LIGHTS
-    //////////////////////////
     // calculate light positions & spotlight directions
     printf("before light pos calculations\n");
     scenegraph->getRoot()->accept(lightPosCalculator);
@@ -266,39 +239,11 @@ void View::display(sgraph::IScenegraph *scenegraph)
     double currenttime = glfwGetTime();
     if ((currenttime - time) > 1.0)
     {
-        // printf("Framerate: %2.0f\r", frames / (currenttime - time));
         frames = 0;
         time = currenttime;
     }
 
     lightLocations.clear();
-
-    /*
-    void drawSpotlight(float posX, float posY, float posZ, float dirX, float dirY, float dirZ, float cutoffAngle, float exponent, float r, float g, float b)
-    {
-        glEnable(GL_LIGHTING);
-        glEnable(GL_LIGHT0);
-        GLfloat light_position[] = {posX, posY, posZ, 1.0f};
-        GLfloat light_direction[] = {dirX, dirY, dirZ, 0.0f};
-        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-        glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, light_direction);
-        glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, cutoffAngle);
-        glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, exponent);
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, {r, g, b, 1.0f});
-        glEnable(GL_COLOR_MATERIAL);
-        glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-        glBegin(GL_QUADS);
-        glNormal3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(-50.0f, 0.0f, -50.0f);
-        glVertex3f(-50.0f, 0.0f, 50.0f);
-        glVertex3f(50.0f, 0.0f, 50.0f);
-        glVertex3f(50.0f, 0.0f, -50.0f);
-        glEnd();
-        glDisable(GL_LIGHT0);
-        glDisable(GL_LIGHTING);
-        glDisable(GL_COLOR_MATERIAL);
-    }
-    */
 }
 
 void View::setProjection(int width, int height)
@@ -469,37 +414,4 @@ void View::setFrustumVertices()
     mesh.setPrimitiveSize(2);
 
     frustum_meshes.push_back(mesh);
-
-    // if (cameraMode == GLOBAL) {
-    //     personEyePosition = glm::vec3(100.0f, 120.0f, 150.0f);
-    //     personDirection = glm::vec3(0.0f, 0.0f, 0.0f);
-    // } else if (cameraMode == CHOPPER) {
-    //     personEyePosition = glm::vec3(100.0f * sin(glm::radians(20.0f)), 200.0f, 100.0f * cos(glm::radians(20.0f)));
-    //     personDirection = glm::vec3(50.0f, 100.0f, 10.0f);
-    // }
-
-    // float tanFOV = tan(glm::radians(fov / 2.0f));
-    // // near
-    // float nearHeight = 2.0f * tanFOV * nearDist;
-    // float nearWidth = nearHeight * aspectRatio;
-
-    // // far
-    // float farHeight = 2.0f * tanFOV * farDist;
-    // float farWidth = farHeight * aspectRatio;
-
-    // glm::vec3 right = glm::normalize(glm::cross(personDirection, personUp));
-    // glm::vec3 camera_up = glm::normalize(glm::cross(right, personDirection));
-
-    // glm::vec3 fc = personEyePosition + personDirection * farDist;
-    // glm::vec3 nc = personEyePosition + personDirection * nearDist;
-
-    // glm::vec3 ftl = fc + (camera_up * farHeight/4.0f) + (right * farWidth/4.0f);
-    // glm::vec3 ftr = fc + (camera_up * farHeight/4.0f) + (right * farWidth/4.0f);
-    // glm::vec3 fbl = fc - (camera_up * farHeight/4.0f) - (right * farWidth/4.0f);
-    // glm::vec3 fbr = fc - (camera_up * farHeight/4.0f) + (right * farWidth/4.0f);
-
-    // glm::vec3 ntl = nc + (camera_up * nearHeight/4.0f) - (right * nearWidth/4.0f);
-    // glm::vec3 ntr = nc + (camera_up * nearHeight/4.0f) + (right * nearWidth/4.0f);
-    // glm::vec3 nbl = nc - (camera_up * nearHeight/4.0f) - (right * nearWidth/4.0f);
-    // glm::vec3 nbr = nc - (camera_up * nearHeight/4.0f) + (right * nearWidth/4.0f);
 }
