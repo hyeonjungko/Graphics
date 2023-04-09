@@ -20,63 +20,69 @@ namespace raytracer
          * (e) Texture coordinates and the texture object, if applicable.
          */
     public:
-        inline float getTime() const;
-        inline glm::vec3 getIntersection() const;
+        inline float getT() const;
+        inline glm::vec4 getIntersection() const;
         inline glm::vec3 getNormal() const;
         inline util::Material getMaterial() const;
         inline util::TextureImage getTexture() const;
 
-        inline void setT(float x, float y, float z);
+        inline void setT(float time);
         inline void setIntersection(float x, float y, float z);
         inline void setNormal(float x, float y, float z);
+        inline void setNormal(const glm::vec3 &norm);
         inline void setMaterial(const util::Material &mat);
         inline void setTextureImage(const util::TextureImage &texture);
 
     private:
         float t;
-        glm::vec3 intersection;
+        glm::vec4 intersection;
         glm::vec3 normal;
-        Material material;
-        TextureImage texture; // TODO: Q: what are "texture coordinates?"
+        util::Material material;
+        util::TextureImage texture;
+        // TODO: need to add Texture coordinates
     };
 
-    float getTime() const
+    float HitRecord::getT() const
     {
         return t;
     }
-    glm::vec3 getIntersection() const
+    glm::vec4 HitRecord::getIntersection() const
     {
-        return glm::vec3(intersection);
+        return glm::vec4(intersection);
     }
-    glm::vec3 getNormal() const
+    glm::vec3 HitRecord::getNormal() const
     {
         return glm::vec3(normal);
     }
-    util::Material getMaterial() const
+    util::Material HitRecord::getMaterial() const
     {
         return material;
     }
-    util::TextureImage getTexture() const
+    util::TextureImage HitRecord::getTexture() const
     {
         return texture;
     }
-    void setT(float time)
+    void HitRecord::setT(float time)
     {
         t = time;
     }
-    void setIntersection(float x, float y, float z)
+    void HitRecord::setIntersection(float x, float y, float z)
     {
-        intersection = glm::vec3(x, y, z);
+        intersection = glm::vec4(x, y, z, 1);
     }
-    void setNormal(float x, float y, float z)
+    void HitRecord::setNormal(float x, float y, float z)
     {
         normal = glm::vec3(x, y, z);
     }
-    void setMaterial(const util::Material &mat)
+    void HitRecord::setNormal(const glm::vec3 &norm)
+    {
+        normal = glm::vec3(norm);
+    }
+    void HitRecord::setMaterial(const util::Material &mat)
     {
         material = mat;
     }
-    void setTextureImage(const util::TextureImage &textureImage)
+    void HitRecord::setTextureImage(const util::TextureImage &textureImage)
     {
         texture = textureImage;
     }

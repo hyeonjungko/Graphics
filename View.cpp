@@ -8,6 +8,10 @@ using namespace std;
 #include <glm/gtc/type_ptr.hpp>
 #include "sgraph/GLScenegraphRenderer.h"
 #include "sgraph/ScenegraphLightPosCalculator.h"
+#include "raytracer/Ray.h"
+#include "raytracer/HitRecord.h"
+#include "sgraph/RayCasterRenderer.h"
+#include "PPMImageExporter.h"
 // #include "VertexAttrib.h"
 
 #include "glm/gtx/string_cast.hpp" // TODO: added just for printing
@@ -143,6 +147,58 @@ void View::initLightShaderVars()
         ll.isSpotlight = shaderLocations.getLocation(name.str() + ".isSpotlight");
         lightLocations.push_back(ll);
     }
+}
+
+void View::raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::mat4> modelview)
+{
+    /**
+     * populates the image of the given dimensions with the output to ray tracing and write the image to a PPM image
+     * (look at how a PPM file is imported for a texture, and write the image similarly).
+     * The modelview stack currently contains the camera transform that is set in the View::draw method.
+     *
+     * For every pixel:
+     * Compute the ray starting from the eye and passing through this pixel in view coordinates.
+     * Pass the ray to the ray caster renderer (below) that returns information about ray casting.
+     * Write the color to the appropriate place in the array.
+     */
+
+    // calculate intersection (t)
+    // Q: where is the origin of the ray coming from? -> camera origin
+    // create the 3DRay object with origin and t
+    // pass the 3DRay to RayCasterRenderer
+    // RayCasterRenderer returns color
+    // write the returned color to array
+
+    // output image buffer
+    vector<glm::vec3> colors;
+
+    float imageAspectRatio = (float)w / h;
+    float fov = 100.0f;
+
+    // for every pixel (i,j)
+    for (int i = 0; i < w; i++)
+    {
+        for (int j = 0; j < h; j++)
+        {
+
+            // start with origin at (0,0,0) for testing
+            glm::vec3 rayOrigin = glm::vec3(0, 0, 0);
+            // calculate ray direction w.r.t. current pixel (i,j)
+            glm::vec3 rayDirection = glm::vec3(i - 0.5 * w, j - 0.5 * h, -(0.5 * h) / tan(glm::radians(fov / 2)));
+            rayDirection = normalize(rayDirection);
+
+            raytracer::Ray ray = raytracer::Ray(rayOrigin, rayDirection);
+
+            // initialize raycaster for this ray
+            sgraph::RayCasterRenderer *raycaster = new sgraph::RayCasterRenderer(ray, objects); // TODO:
+            scenegraph->getRoot()->accept(raycaster);                                           // TODO:
+            raytracer::HitRecord hit = raycaster->getHitRecord();                               // TODO:
+        }
+    }
+    // export array of colors into PPM image
+    // vec3 -> GLUbyte -> PPM
+    PPMImageExporter exporter = PPMImageExporter();
+    exporter.export(w, h, colors);
 }
 
 void View::display(sgraph::IScenegraph *scenegraph)

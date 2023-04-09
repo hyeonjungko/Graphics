@@ -1,5 +1,4 @@
-#all the instances
-instance box models/box-outside.obj
+instance sphere models/sphere.obj
 
 #material
 material mat-node-3-0
@@ -13,11 +12,10 @@ end-material
 #the root
 group node-1-0 root
 scale node-2-0 scale 70 70 70
-leaf node-3-0 one-box instanceof box 
+leaf node-3-0 one-box instanceof sphere 
 
 
 assign-material node-3-0 mat-node-3-0
 add-child node-3-0 node-2-0
 add-child node-2-0 node-1-0
 assign-root node-1-0
-

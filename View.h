@@ -45,6 +45,7 @@ public:
     // void init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib>> &meshes);
     void init(Callbacks *callbacks, Model &model);
     void display(sgraph::IScenegraph *scenegraph);
+    void raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::mat4> modelview);
     void setProjection(int width, int height);
     tuple<float, float> getCurrentMousePositions();
     void updateTrackBallRotation(float xDelta, float yDelta);
