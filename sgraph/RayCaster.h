@@ -227,6 +227,18 @@ namespace sgraph
         glm::vec3 getPixelColor()
         {
             // TODO:
+            /*
+            if (hit != nullptr)
+            {
+                // TODO: calculate and return color for current HitRecord
+            }
+            else
+            {
+                // return default bgColor
+                return glm::vec3(1, 0.5, 1);
+            }
+            */
+            return glm::vec3(255, 168, 82);
         }
 
     private:

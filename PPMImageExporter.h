@@ -20,21 +20,21 @@ public:
     {
     }
 
-    void PPMImageExporter::exportToPPM(int width, int height, vector<glm::vec3> imageColors)
+    void exportToPPM(int width, int height, vector<glm::vec3> imageColors)
     {
         ofstream fp;
         fp.open("output.ppm");
         // write the word P3
         fp << "P3\n";
         // write width and height
-        fp << width << " " << height << "/n";
+        fp << width << " " << height << endl;
         // write factor
-        fp << "255\n";
+        fp << "255" << endl;
 
         // write r,g,b values for
         for (auto &color : imageColors)
         {
-            fp << char(color.x) << char(color.y) << char(color.z) << endl;
+            fp << color.x << " " << color.y << " " << color.z << endl;
         }
 
         // close file

@@ -195,7 +195,7 @@ void View::raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::ma
             scenegraph->getRoot()->accept(raycaster);
 
             // based on all HitRecords encountered (or none), raycaster calculates the color for this pixel
-            glm::vec3 pixelColor = raycaster->getPixelColor();
+            glm::vec3 pixelColor = raycaster->getPixelColor(); // TODO:
 
             // add pixelColor to vector of all pixel colors
             imageColors.push_back(pixelColor);
@@ -204,6 +204,8 @@ void View::raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::ma
 
     // export vector of image pixel colors into PPM image
     PPMImageExporter exporter = PPMImageExporter();
+    cout << "meowww" << imageColors[0] << endl
+         << endl;
     exporter.exportToPPM(w, h, imageColors);
 }
 
@@ -255,7 +257,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
     {
         int window_width, window_height;
         glfwGetFramebufferSize(window, &window_width, &window_height);
-        raytrace(scenegraph, window_width, window_height, modelview);
+        raytrace(scenegraph, 300, 300, modelview); // TODO: Q: are the width and height the window width & height?
     }
 
     // LIGHTS
