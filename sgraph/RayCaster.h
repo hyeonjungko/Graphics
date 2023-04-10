@@ -116,14 +116,21 @@ namespace sgraph
          * determine if the ray in this raycaster intersects with the box object
          * if so, set t
          */
-        bool boxIntersect(glm::vec4 &orig, glm::vec4 &rayInvDir, float &t)
+        bool boxIntersect(glm::vec4 &orig, glm::vec4 &rayDir, float &t)
         {
+            float tx1, tx2, ty1, ty2, tz1, tz2;
             float tmin, tmax, tymin, tymax, tzmin, tzmax;
+            glm::vec4 rayInvDir = 1.0f / rayDir;
 
-            tmin = (-0.5f - orig.x) * rayInvDir.x;
-            tmax = (0.5f - orig.x) * rayInvDir.x;
-            tymin = (-0.5f - orig.y) * rayInvDir.y;
-            tymax = (0.5f - orig.y) * rayInvDir.y;
+            tx1 = (-0.5f - orig.x) * rayInvDir.x;
+            tx2 = (0.5f - orig.x) * rayInvDir.x;
+            ty1 = (-0.5f - orig.y) * rayInvDir.y;
+            ty2 = (0.5f - orig.y) * rayInvDir.y;
+
+            tmin = min(tx1, tx2);
+            tmax = max(tx1, tx2);
+            tymin = min(ty1, ty2);
+            tymax = max(ty1, ty2);
 
             if ((tmin > tymax) || (tymin > tmax))
                 return false;
@@ -133,8 +140,10 @@ namespace sgraph
             if (tymax < tmax)
                 tmax = tymax;
 
-            tzmin = (-0.5f - orig.z) * rayInvDir.z;
-            tzmax = (0.5f - orig.z) * rayInvDir.z;
+            tz1 = (-0.5f - orig.z) * rayInvDir.z;
+            tz2 = (0.5f - orig.z) * rayInvDir.z;
+            tzmin = min(tz1, tz2);
+            tzmax = max(tz1, tz2);
 
             if ((tmin > tzmax) || (tzmin > tmax))
                 return false;
@@ -178,29 +187,35 @@ namespace sgraph
             bool objIsBox = leafNode->getInstanceOf() == "box";
 
             if ((objIsSphere && sphereIntersect(orig, rayDir, t)) ||
-                (objIsBox && boxIntersect(orig, rayInvDir, t)))
+                (objIsBox && boxIntersect(orig, rayDir, t)))
             {
-                hitPos = orig + rayDir * t;
-                // update intersection position and normal from object coordinate system back to view coordinate system
-                hitPos = hitPos * modelview.top();
-                hitNorm = normalize(hitPos); // center at (0,0,0) so no subtraction
+                float currHitT = hit.getT();
+                if (currHitT == INFINITY || t < currHitT)
+                {
+                    // can update HitRecord to this t
+                    hitPos = orig + rayDir * t;
+                    // update intersection position and normal from object coordinate system back to view coordinate system
+                    hitPos = hitPos * modelview.top();
+                    hitNorm = normalize(hitPos); // center at (0,0,0) so no subtraction
 
-                // set HitRecord in view coordinate system
-                hit.setT(t);
-                hit.setIntersection(hitPos.x, hitPos.y, hitPos.z);
-                hit.setNormal(hitNorm);
-                // hit.setMaterial(const util::Material &mat);             // TODO:
-                // hit.setTextureImage(const util::TextureImage &texture); // TODO:
-                cout << "found intersection " << hit.getT() << endl;
+                    // set HitRecord in view coordinate system
+                    hit.setT(t);
+                    hit.setIntersection(hitPos.x, hitPos.y, hitPos.z);
+                    hit.setNormal(hitNorm);
+                    // hit.setMaterial(const util::Material &mat);             // TODO:
+                    // hit.setTextureImage(const util::TextureImage &texture); // TODO:
+                    cout << "found new closer intersection " << hit.getT() << endl;
+                }
+                else
+                {
+                    // keep current HitRecord
+                }
             }
             else
             {
                 cout << "in else " << hit.getT() << endl;
                 // no intersection, no updates on hitRecord
             }
-            // there may be multiple HitRecords as this raycaster with this particular ray
-            // descends down the scenegraph.
-            // TODO: Q: how to determine the correct HitRecord? -> probably one with the smallest positive t value?
         }
 
         /**
