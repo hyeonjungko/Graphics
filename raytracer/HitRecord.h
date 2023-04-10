@@ -4,6 +4,7 @@
 #include "glm/glm.hpp"
 #include "Material.h"
 #include "TextureImage.h"
+#include <cmath>
 
 namespace raytracer
 {
@@ -20,6 +21,10 @@ namespace raytracer
          * (e) Texture coordinates and the texture object, if applicable.
          */
     public:
+        HitRecord()
+        {
+            t = INFINITY;
+        }
         inline float getT() const;
         inline glm::vec4 getIntersection() const;
         inline glm::vec3 getNormal() const;

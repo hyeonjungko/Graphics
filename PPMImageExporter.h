@@ -22,8 +22,7 @@ public:
 
     void exportToPPM(int width, int height, vector<glm::vec3> imageColors)
     {
-        ofstream fp;
-        fp.open("output.ppm");
+        ofstream fp("output.ppm", std::ofstream::trunc);
         // write the word P3
         fp << "P3\n";
         // write width and height

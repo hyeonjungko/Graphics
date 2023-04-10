@@ -36,6 +36,7 @@ namespace sgraph
         RayCaster(stack<glm::mat4> mv, raytracer::Ray r, map<string, util::ObjectInstance *> &os) : objects(os), ray(r), modelview(mv)
         {
             hit = raytracer::HitRecord();
+            cout << "in RayCaster(), modelview.top(): " << modelview.top() << endl;
         }
         ~RayCaster()
         {
@@ -63,7 +64,10 @@ namespace sgraph
             float t0, t1;
             float a = glm::dot(rayDir, rayDir); // should be 1 if ray directions were normalized
             float b = 2 * glm::dot(rayDir, orig);
-            float c = glm::dot(orig, orig) - 1; // 1 because radius^2 is 1
+            float c = orig.x * orig.x + orig.y * orig.y + orig.z * orig.z - 1; // 1 because radius^2 is 1
+
+            cout << "in sphereIntersect, rayDir: " << rayDir << " rayOrig: " << orig << endl;
+            cout << "in sphereIntersect, a: " << a << " b: " << b << " c: " << c << endl;
 
             float discr = b * b - 4 * a * c;
 
@@ -80,9 +84,11 @@ namespace sgraph
             else
             {
                 // two solutions for t. ray goes through the object
-                float q = (b > 0) ? -0.5 * (b + sqrt(discr)) : -0.5 * (b - sqrt(discr));
-                t0 = q / a;
-                t1 = c / q;
+                // float q = (b > 0) ? -0.5 * (b + sqrt(discr)) : -0.5 * (b - sqrt(discr));
+                // t0 = q / a;
+                // t1 = c / q;
+                t0 = (-b + sqrt(discr)) / (2 * a);
+                t1 = (-b - sqrt(discr)) / (2 * a);
             }
 
             // determine the closest positive t value if it exists
@@ -103,6 +109,7 @@ namespace sgraph
             }
             // found t
             t = t0;
+            cout << "in sphereIntersect, found t: " << t << endl;
             return true;
         }
         /**
@@ -154,16 +161,18 @@ namespace sgraph
             // for object in LeafNode,
             // calculate if there is an intersection between the object & this caster's ray
 
-            // TODO: Q: how to determine if object is a sphere or a box? Just by mesh name? or if OpenGL function, what function?
-            // how to get the ray's direction from view coordinate system into object's coordinate system?
-            // -> by multiplying the inverse of the modelview.top()
+            // multiply the inverse of the modelview.top() to get the ray's origin and direction from
+            // view coordinate system into object's coordinate system
             glm::vec3 color;
             float t;
             glm::vec4 hitPos;
             glm::vec4 hitNorm;
-            glm::vec4 orig = ray.getOrigin() * glm::inverse(modelview.top()); // ray origin position now in object coordinate system
-            glm::vec4 rayDir = ray.getDir() * glm::inverse(modelview.top());  // ray direction now in object coordinate system
+            glm::vec4 orig = glm::inverse(modelview.top()) * ray.getOrigin(); // ray origin position now in object coordinate system
+            glm::vec4 rayDir = glm::inverse(modelview.top()) * ray.getDir();  // ray direction now in object coordinate system
             glm::vec4 rayInvDir = 1.0f / rayDir;
+
+            cout << "in visitLeafNode, rayDir: " << rayDir << " rayOrig: " << orig << endl;
+            cout << "in visitLeafNode, modelview.top(): " << modelview.top() << endl;
 
             bool objIsSphere = leafNode->getInstanceOf() == "sphere";
             bool objIsBox = leafNode->getInstanceOf() == "box";
@@ -182,15 +191,16 @@ namespace sgraph
                 hit.setNormal(hitNorm);
                 // hit.setMaterial(const util::Material &mat);             // TODO:
                 // hit.setTextureImage(const util::TextureImage &texture); // TODO:
+                cout << "found intersection " << hit.getT() << endl;
             }
             else
             {
-                // no intersection
-                // TODO: Q: what to set as HitRecord if no intersection? or would u not store anything and set it to null?
+                cout << "in else " << hit.getT() << endl;
+                // no intersection, no updates on hitRecord
             }
-            // TODO: there may be multiple HitRecords as this raycaster with this particular ray
+            // there may be multiple HitRecords as this raycaster with this particular ray
             // descends down the scenegraph.
-            // Q: how to determine the correct HitRecord? -> probably one with the smallest positive t value?
+            // TODO: Q: how to determine the correct HitRecord? -> probably one with the smallest positive t value?
         }
 
         /**
@@ -226,23 +236,22 @@ namespace sgraph
 
         glm::vec3 getPixelColor()
         {
-            // TODO:
-            /*
-            if (hit != nullptr)
+            float hitT = hit.getT();
+            if (hitT == INFINITY)
             {
-                // TODO: calculate and return color for current HitRecord
+                // return default bgColor
+                return glm::vec3(66, 135, 245);
             }
             else
             {
-                // return default bgColor
-                return glm::vec3(1, 0.5, 1);
+                // TODO: calculate and return color for current HitRecord
+                //
+                return glm::vec3(245, 173, 66);
             }
-            */
-            return glm::vec3(255, 168, 82);
         }
 
     private:
-        stack<glm::mat4> &modelview;
+        stack<glm::mat4> modelview;
         raytracer::Ray ray;
         raytracer::HitRecord hit;
 

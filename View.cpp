@@ -223,7 +223,8 @@ void View::display(sgraph::IScenegraph *scenegraph)
     if (cameraMode == GLOBAL)
     {
         modelview.top() = modelview.top() *
-                          glm::lookAt(glm::vec3(100.0f, 100.0f, 150.0f),
+                          // glm::lookAt(glm::vec3(100.0f, 100.0f, 150.0f),
+                          glm::lookAt(glm::vec3(0.0f, 0.0f, 100.0f),
                                       // glm::lookAt(glm::vec3(0.0f, 0.0f, 150.0f),
                                       glm::vec3(0.0f, 0.0f, 0.0f),
                                       personUp);
@@ -257,6 +258,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
     {
         int window_width, window_height;
         glfwGetFramebufferSize(window, &window_width, &window_height);
+        cout << "in view.display, about to call raytrace w/ modelview.top(): " << modelview.top() << endl;
         raytrace(scenegraph, 300, 300, modelview); // TODO: Q: are the width and height the window width & height?
     }
 
