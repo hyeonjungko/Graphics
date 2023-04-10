@@ -1,5 +1,5 @@
-#ifndef _RAYCASTERRENDERER_H_
-#define _RAYCASTERRENDERER_H_
+#ifndef _RayCaster_H_
+#define _RayCaster_H_
 
 #include "../ImageLoader.h"
 #include "../PPMImageLoader.h"
@@ -30,15 +30,14 @@ namespace sgraph
      * This visitor implements ray caster
      *
      */
-    class RayCasterRenderer : public SGNodeVisitor
+    class RayCaster : public SGNodeVisitor
     {
     public:
-        RayCasterRenderer(raytracer::Ray r, map<string, util::ObjectInstance *> &os) : objects(os)
+        RayCaster(stack<glm::mat4> mv, raytracer::Ray r, map<string, util::ObjectInstance *> &os) : objects(os), ray(r), modelview(mv)
         {
-            ray = r;
             hit = raytracer::HitRecord();
         }
-        ~RayCasterRenderer()
+        ~RayCaster()
         {
         }
 
@@ -155,10 +154,10 @@ namespace sgraph
             // for object in LeafNode,
             // calculate if there is an intersection between the object & this caster's ray
 
-            // TODO: Q: how to determine if object is a sphere or a box? if OpenGL function, what function?
-            // TODO: Q: we aren't working on the PolygonMesh at all right?
+            // TODO: Q: how to determine if object is a sphere or a box? Just by mesh name? or if OpenGL function, what function?
             // how to get the ray's direction from view coordinate system into object's coordinate system?
             // -> by multiplying the inverse of the modelview.top()
+            glm::vec3 color;
             float t;
             glm::vec4 hitPos;
             glm::vec4 hitNorm;
@@ -166,10 +165,14 @@ namespace sgraph
             glm::vec4 rayDir = ray.getDir() * glm::inverse(modelview.top());  // ray direction now in object coordinate system
             glm::vec4 rayInvDir = 1.0f / rayDir;
 
-            if ((objIsSphere && sphereIntersect(orig, rayDir, t)) || (objIsBox && boxIntersect(orig, rayInvDir, t)))
+            bool objIsSphere = leafNode->getInstanceOf() == "sphere";
+            bool objIsBox = leafNode->getInstanceOf() == "box";
+
+            if ((objIsSphere && sphereIntersect(orig, rayDir, t)) ||
+                (objIsBox && boxIntersect(orig, rayInvDir, t)))
             {
                 hitPos = orig + rayDir * t;
-                // update t, intersection position and normal from object coordinate system back to view coordinate system
+                // update intersection position and normal from object coordinate system back to view coordinate system
                 hitPos = hitPos * modelview.top();
                 hitNorm = normalize(hitPos); // center at (0,0,0) so no subtraction
 
@@ -182,9 +185,12 @@ namespace sgraph
             }
             else
             {
-                // TODO: no intersection
-                // TODO: Q: what to store in HitRecord if no intersection? or would u not store anything and set it to null?
+                // no intersection
+                // TODO: Q: what to set as HitRecord if no intersection? or would u not store anything and set it to null?
             }
+            // TODO: there may be multiple HitRecords as this raycaster with this particular ray
+            // descends down the scenegraph.
+            // Q: how to determine the correct HitRecord? -> probably one with the smallest positive t value?
         }
 
         /**
@@ -216,6 +222,11 @@ namespace sgraph
         void visitRotateTransform(RotateTransform *rotateNode)
         {
             visitTransformNode(rotateNode);
+        }
+
+        glm::vec3 getPixelColor()
+        {
+            // TODO:
         }
 
     private:

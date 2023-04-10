@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <vector>
 #include <glm/glm.hpp>
 
@@ -19,9 +20,9 @@ public:
     {
     }
 
-    void PPMImageExporter::export(int width, int height, vector<glm::vec3> image)
+    void PPMImageExporter::exportToPPM(int width, int height, vector<glm::vec3> imageColors)
     {
-        ifstream fp;
+        ofstream fp;
         fp.open("output.ppm");
         // write the word P3
         fp << "P3\n";
@@ -29,12 +30,11 @@ public:
         fp << width << " " << height << "/n";
         // write factor
         fp << "255\n";
-        for (auto &color : image)
-        { // TODO: confirm this writes the proper PPM image
-            fp << color.x;
-            fp << color.y;
-            fp << color.z;
-            fp << "/n";
+
+        // write r,g,b values for
+        for (auto &color : imageColors)
+        {
+            fp << char(color.x) << char(color.y) << char(color.z) << endl;
         }
 
         // close file

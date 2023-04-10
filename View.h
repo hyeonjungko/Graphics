@@ -64,6 +64,7 @@ public:
     void setFrustumVertices();
     void calculateLightPos(sgraph::IScenegraph *scenegraph); //
     void initLightShaderVars();
+    void toggleRaytraceMode();
 
 private:
     GLFWwindow *window;
@@ -85,6 +86,7 @@ private:
     float left;
     float up;
     float aspectRatio;
+    bool raytraceEnabled;
 
     vector<util::PolygonMesh<VertexAttrib>> frustum_meshes;
     vector<util::ObjectInstance *> frustum_objects;

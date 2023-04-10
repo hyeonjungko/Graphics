@@ -10,11 +10,11 @@ using namespace std;
 #include "sgraph/ScenegraphLightPosCalculator.h"
 #include "raytracer/Ray.h"
 #include "raytracer/HitRecord.h"
-#include "sgraph/RayCasterRenderer.h"
+#include "sgraph/RayCaster.h"
 #include "PPMImageExporter.h"
 // #include "VertexAttrib.h"
 
-#include "glm/gtx/string_cast.hpp" // TODO: added just for printing
+#include "glm/gtx/string_cast.hpp" // added just for printing
 
 View::View()
 {
@@ -26,6 +26,7 @@ View::~View()
 
 void View::init(Callbacks *callbacks, Model &model)
 {
+    raytraceEnabled = false;
     sgraph::IScenegraph *scenegraph = model.getScenegraph();
     map<string, util::PolygonMesh<VertexAttrib>> meshes = scenegraph->getMeshes();
 
@@ -165,12 +166,12 @@ void View::raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::ma
     // calculate intersection (t)
     // Q: where is the origin of the ray coming from? -> camera origin
     // create the 3DRay object with origin and t
-    // pass the 3DRay to RayCasterRenderer
-    // RayCasterRenderer returns color
+    // pass the 3DRay to RayCaster
+    // RayCaster returns color
     // write the returned color to array
 
     // output image buffer
-    vector<glm::vec3> colors;
+    vector<glm::vec3> imageColors;
 
     float imageAspectRatio = (float)w / h;
     float fov = 100.0f;
@@ -180,25 +181,30 @@ void View::raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::ma
     {
         for (int j = 0; j < h; j++)
         {
-
-            // start with origin at (0,0,0) for testing
-            glm::vec3 rayOrigin = glm::vec3(0, 0, 0);
             // calculate ray direction w.r.t. current pixel (i,j)
-            glm::vec3 rayDirection = glm::vec3(i - 0.5 * w, j - 0.5 * h, -(0.5 * h) / tan(glm::radians(fov / 2)));
+            glm::vec4 rayDirection = glm::vec4(i - 0.5 * w, j - 0.5 * h, -(0.5 * h) / tan(glm::radians(fov / 2)), 0);
+            glm::vec4 rayOrigin = glm::vec4(0, 0, 0, 1);
             rayDirection = normalize(rayDirection);
 
             raytracer::Ray ray = raytracer::Ray(rayOrigin, rayDirection);
 
             // initialize raycaster for this ray
-            sgraph::RayCasterRenderer *raycaster = new sgraph::RayCasterRenderer(ray, objects); // TODO:
-            scenegraph->getRoot()->accept(raycaster);                                           // TODO:
-            raytracer::HitRecord hit = raycaster->getHitRecord();                               // TODO:
+            sgraph::RayCaster *raycaster = new sgraph::RayCaster(modelview, ray, objects);
+
+            // raycaster descends down the scenegraph to find the closest HitRecord
+            scenegraph->getRoot()->accept(raycaster);
+
+            // based on all HitRecords encountered (or none), raycaster calculates the color for this pixel
+            glm::vec3 pixelColor = raycaster->getPixelColor();
+
+            // add pixelColor to vector of all pixel colors
+            imageColors.push_back(pixelColor);
         }
     }
-    // export array of colors into PPM image
-    // vec3 -> GLUbyte -> PPM
+
+    // export vector of image pixel colors into PPM image
     PPMImageExporter exporter = PPMImageExporter();
-    exporter.export(w, h, colors);
+    exporter.exportToPPM(w, h, imageColors);
 }
 
 void View::display(sgraph::IScenegraph *scenegraph)
@@ -206,7 +212,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
     printf("in view display now\n");
     program.enable();
     // glClearColor(0, 0, 0, 1);
-    glClearColor(1, 1, 1, 1);
+    glClearColor(1, 1, 1, 1); // TODO: probably change this while testing raytracing
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
@@ -244,6 +250,13 @@ void View::display(sgraph::IScenegraph *scenegraph)
                       glm::rotate(glm::mat4(1.0), glm::radians(xRotAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+    if (raytraceEnabled)
+    {
+        int window_width, window_height;
+        glfwGetFramebufferSize(window, &window_width, &window_height);
+        raytrace(scenegraph, window_width, window_height, modelview);
+    }
 
     // LIGHTS
     // calculate light positions & spotlight directions
@@ -421,6 +434,7 @@ void View::turnRight()
 
 // document references: https://cgvr.cs.uni-bremen.de/teaching/cg_literatur/lighthouse3d_view_frustum_culling/
 void View::setFrustumVertices()
+
 {
     float fov = 80.0f;
     float nearDist = 0.1f;
@@ -470,4 +484,9 @@ void View::setFrustumVertices()
     mesh.setPrimitiveSize(2);
 
     frustum_meshes.push_back(mesh);
+}
+
+void View::toggleRaytraceMode()
+{
+    raytraceEnabled = !raytraceEnabled;
 }
