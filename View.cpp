@@ -191,11 +191,14 @@ void View::raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::ma
             // initialize raycaster for this ray
             sgraph::RayCaster *raycaster = new sgraph::RayCaster(modelview, ray, objects);
 
-            // raycaster descends down the scenegraph to find the closest HitRecord
+            // raycaster descends down the scenegraph to find the closest intersection and sets HitRecord
             scenegraph->getRoot()->accept(raycaster);
 
-            // based on all HitRecords encountered (or none), raycaster calculates the color for this pixel
-            glm::vec3 pixelColor = raycaster->getPixelColor(); // TODO:
+            raytracer::HitRecord hit = raycaster->getHitRecord();
+
+            // TODO:
+            // based on all intersections encountered (or none), calculate the color for this pixel
+            glm::vec3 pixelColor = calculatePixelColor(hit);
 
             // add pixelColor to vector of all pixel colors
             imageColors.push_back(pixelColor);
@@ -207,6 +210,23 @@ void View::raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::ma
     cout << "meowww" << imageColors[0] << endl
          << endl;
     exporter.exportToPPM(w, h, imageColors);
+}
+
+glm::vec3 View::calculatePixelColor(raytracer::HitRecord hit)
+{
+    // TODO: calculate pixel color based on given HitRecord and view's LightLocations
+    float hitT = hit.getT();
+    if (hitT == INFINITY)
+    {
+        // return default bgColor
+        return glm::vec3(0, 0, 0);
+    }
+    else
+    {
+        // TODO: calculate and return color for current HitRecord
+        //
+        return glm::vec3(255, 255, 255);
+    }
 }
 
 void View::display(sgraph::IScenegraph *scenegraph)
@@ -254,13 +274,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
 
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-    if (raytraceEnabled)
-    {
-        int window_width, window_height;
-        glfwGetFramebufferSize(window, &window_width, &window_height);
-        cout << "in view.display, about to call raytrace w/ modelview.top(): " << modelview.top() << endl;
-        raytrace(scenegraph, 300, 300, modelview); // TODO: Q: are the width and height the window width & height?
-    }
+    stack<glm::mat4> modelviewJustCamera = modelview;
 
     // LIGHTS
     // calculate light positions & spotlight directions
@@ -273,6 +287,14 @@ void View::display(sgraph::IScenegraph *scenegraph)
     // get input variables that need to be given to the shader program
     initLightShaderVars();
 
+    if (raytraceEnabled)
+    {
+        int window_width, window_height;
+        glfwGetFramebufferSize(window, &window_width, &window_height);
+        // TODO: Q: because this happens after light position calculations, the modelview is all
+        cout << "in view.display, about to call raytrace w/ modelview.top(): " << modelview.top() << endl;
+        raytrace(scenegraph, 300, 300, modelviewJustCamera); // TODO: Q: are the width and height the window width & height?
+    }
     // draw lights
     for (int i = 0; i < lights.size(); i++)
     {

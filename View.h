@@ -16,6 +16,8 @@
 #include "Callbacks.h"
 #include "sgraph/IScenegraph.h"
 #include "Model.h"
+#include "raytracer/Ray.h"
+#include "raytracer/HitRecord.h"
 
 #include <stack>
 using namespace std;
@@ -45,6 +47,7 @@ public:
     // void init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib>> &meshes);
     void init(Callbacks *callbacks, Model &model);
     void display(sgraph::IScenegraph *scenegraph);
+    glm::vec3 calculatePixelColor(raytracer::HitRecord hit);
     void raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::mat4> modelview);
     void setProjection(int width, int height);
     tuple<float, float> getCurrentMousePositions();
