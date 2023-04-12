@@ -1,40 +1,41 @@
-# Lighting and Texture Mapping
+# Lighting, Texture Mapping & Raytracing
 ## Running the Program
 
   ```
   make clean
   make Scenegraphs
-  ./Scenegraphs -i scenegraphmodels/scene.txt
+  ./Scenegraphs -i scenegraphmodels/{FILENAME}.txt
   ```
 ## Implemented & Nonimplemented Features
 
-:white_check_mark: At least 2 objects with texture images
+:white_check_mark: Ray is created in the correct coordinate system
 
-:white_check_mark: Mipmapping enabled
+:white_check_mark: Ray is transformed correctly before intersection
 
-:white_check_mark: Image credits provided
+:white_check_mark: Point of intersection is correctly determined and transformed for both objects
 
-:white_check_mark: Texture matches the provided image
+:white_check_mark: Normals are correctly calculated and transformed for both objects
 
-:white_check_mark: Two stationary lights, spotlight and point light
+:white_check_mark: Diffuse shading matches opengl rendering
 
-:white_check_mark: Light Implementation: Each node can have multiple lights 
+:white_check_mark: Specular shading matches opengl rendering
 
-:white_check_mark: Light Implementation: Lights are transformed correctly (eyeball code that gets lights in scene graph) 
+:white_check_mark: Spot lights work, raytraced result matches opengl rendering
 
-:white_check_mark: Light Implementation: All lights are sent to shader before drawing any object.
+:white_check_mark: Image(`./raytracer_outputs/raytrace-sphere-and-box-and-spotlight-output.ppm`) showing the final rendering (the best output) of your ray tracer (at least 800x800)
 
-:white_check_mark: Spotlight can be seen
+:white_check_mark: Image(`./raytracer_outputs/raytrace-sphere-and-box-and-spotlight-output.png`) showing the opengl rendering of the same scene and the same camera position as your final raytraced image
 
-:white_check_mark: Spotlight implementation: 1. Cosine of spot angle sent to shader. 2. Shader calculates dot product of -L and D, math is correct
+:white_check_mark: Image(`./raytracer_outputs/raytrace-sphere.ppm`) showing the ray tracing for spheres
 
-:white_check_mark: XML support for lighting and texturing
+:white_check_mark: Image(`./raytracer_outputs/raytrace-box.ppm`) showing the ray tracing for boxes
 
-:x: Objects are colored appropriately
+:white_check_mark: Spot lights work, raytraced result matches opengl rendering
 
-## Texture Image Credits
-`textures/pexels-anni-roenkae-2832432.ppm`: Photo by Anni Roenkae: https://www.pexels.com/photo/photo-of-acrylic-paint-2832432/
+:white_check_mark: Program compiles and runs without errors
 
-`textures/abstract.ppm`: Image by <a href="https://www.freepik.com/free-photo/abstract-pixelated-background_29795083.htm#query=pixel%20texture&position=8&from_view=search&track=ais">Freepik</a>
+
+
+
 
 

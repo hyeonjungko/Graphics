@@ -66,10 +66,6 @@ namespace sgraph
          */
         void visitLeafNode(LeafNode *leafNode)
         {
-            // load in the textures TODO: this is an intermediate step
-            // ImageLoader *loader = new PPMImageLoader();
-            // loader->load("textures/earthmap.ppm");
-            // util::TextureImage *textureObject = new util::TextureImage(loader->getPixels(), loader->getWidth(), loader->getHeight(), "earthmap");
             util::TextureImage *textureObject = leafNode->getTexture();
 
             unsigned int textureId;

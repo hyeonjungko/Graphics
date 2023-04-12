@@ -16,6 +16,8 @@
 #include "Callbacks.h"
 #include "sgraph/IScenegraph.h"
 #include "Model.h"
+#include "raytracer/Ray.h"
+#include "raytracer/HitRecord.h"
 
 #include <stack>
 using namespace std;
@@ -45,6 +47,9 @@ public:
     // void init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib>> &meshes);
     void init(Callbacks *callbacks, Model &model);
     void display(sgraph::IScenegraph *scenegraph);
+    glm::vec4 calculatePixelColor(raytracer::HitRecord hit);
+    glm::vec4 calcLight(util::Light light, raytracer::HitRecord hit);
+    void raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::mat4> modelview);
     void setProjection(int width, int height);
     tuple<float, float> getCurrentMousePositions();
     void updateTrackBallRotation(float xDelta, float yDelta);
@@ -63,6 +68,7 @@ public:
     void setFrustumVertices();
     void calculateLightPos(sgraph::IScenegraph *scenegraph); //
     void initLightShaderVars();
+    void toggleRaytraceMode();
 
 private:
     GLFWwindow *window;
@@ -84,6 +90,7 @@ private:
     float left;
     float up;
     float aspectRatio;
+    bool raytraceEnabled;
 
     vector<util::PolygonMesh<VertexAttrib>> frustum_meshes;
     vector<util::ObjectInstance *> frustum_objects;

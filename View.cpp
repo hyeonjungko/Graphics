@@ -8,9 +8,13 @@ using namespace std;
 #include <glm/gtc/type_ptr.hpp>
 #include "sgraph/GLScenegraphRenderer.h"
 #include "sgraph/ScenegraphLightPosCalculator.h"
+#include "raytracer/Ray.h"
+#include "raytracer/HitRecord.h"
+#include "sgraph/RayCaster.h"
+#include "PPMImageExporter.h"
 // #include "VertexAttrib.h"
 
-#include "glm/gtx/string_cast.hpp" // TODO: added just for printing
+#include "glm/gtx/string_cast.hpp" // added just for printing
 
 View::View()
 {
@@ -22,6 +26,7 @@ View::~View()
 
 void View::init(Callbacks *callbacks, Model &model)
 {
+    raytraceEnabled = false;
     sgraph::IScenegraph *scenegraph = model.getScenegraph();
     map<string, util::PolygonMesh<VertexAttrib>> meshes = scenegraph->getMeshes();
 
@@ -70,11 +75,8 @@ void View::init(Callbacks *callbacks, Model &model)
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1);
 
-    // program.createProgram(string("shaders/phong-multiple.vert"), string("shaders/phong-multiple.frag"));
-    // program.createProgram(string("shaders/phong-multiple-light-only.vert"), string("shaders/phong-multiple-light-only.frag"));
     program.createProgram(string("shaders/phong-multiple-with-texture-spotlights.vert"), string("shaders/phong-multiple-with-texture-spotlights.frag"));
-    //  assuming it got created, get all the shader variables that it uses
-    //  so we can initialize them at some point
+
     //  enable the shader program
     program.enable();
     shaderLocations = program.getAllShaderVariables();
@@ -104,9 +106,6 @@ void View::init(Callbacks *callbacks, Model &model)
     printf("before lightPosCalculator initialization\n");
     lightPosCalculator = new sgraph::ScenegraphLightPosCalculator(modelview);
     printf("after lightPosCalculator initialization\n");
-    // // printf("\nbefore light position calculations\n");
-    // calculateLightPos(scenegraph);
-    // // printf("\nafter light position calculations\n");
 
     int window_width, window_height;
     aspectRatio = (float)window_width / window_height;
@@ -131,16 +130,6 @@ void View::init(Callbacks *callbacks, Model &model)
     personUp = glm::vec3(0.0f, 1.0f, 0.0f); // assume person's up direction is positive y-axis
 }
 
-// void View::calculateLightPos(sgraph::IScenegraph *scenegraph) // TODO: on't need this
-// {
-//     sgraph::ScenegraphLightPosCalculator *lightPosCalc = new sgraph::ScenegraphLightPosCalculator();
-//     // printf("\nin calculateLightPos before light pos calc visitor visits\n");
-//     scenegraph->getRoot()->accept(lightPosCalc);
-//     lights = lightPosCalc->getScenegraphLights();
-//     // printf("\nin calculateLightPos after light pos calc visitor visits\n");
-//     // printf("%d lights in scene\n", lights.size());
-// }
-
 void View::initLightShaderVars()
 {
     // get input variables that need to be given to the shader program
@@ -161,21 +150,176 @@ void View::initLightShaderVars()
     }
 }
 
+void View::raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::mat4> modelview)
+{
+    /**
+     * populates the image of the given dimensions with the output to ray tracing and write the image to a PPM image
+     * (look at how a PPM file is imported for a texture, and write the image similarly).
+     * The modelview stack currently contains the camera transform that is set in the View::draw method.
+     *
+     * For every pixel:
+     * Compute the ray starting from the eye and passing through this pixel in view coordinates.
+     * Pass the ray to the ray caster renderer (below) that returns information about ray casting.
+     * Write the color to the appropriate place in the array.
+     */
+
+    // calculate intersection (t)
+    // Q: where is the origin of the ray coming from? -> camera origin
+    // create the 3DRay object with origin and t
+    // pass the 3DRay to RayCaster
+    // RayCaster returns color
+    // write the returned color to array
+
+    // output image buffer
+    vector<glm::vec4> imageColors;
+
+    float imageAspectRatio = (float)w / h;
+    float fov = 100.0f;
+
+    // for every pixel (i,j)
+    for (int j = h - 1; j >= 0; j--)
+    {
+        for (int i = 0; i < w; i++)
+        {
+            // calculate ray direction w.r.t. current pixel (i,j)
+            glm::vec4 rayDirection = glm::vec4(i - 0.5 * w, j - 0.5 * h, -(0.5 * h) / tan(glm::radians(fov / 2)), 0);
+            glm::vec4 rayOrigin = glm::vec4(0, 0, 0, 1);
+            rayDirection = normalize(rayDirection);
+
+            raytracer::Ray ray = raytracer::Ray(rayOrigin, rayDirection);
+
+            // initialize raycaster for this ray
+            sgraph::RayCaster *raycaster = new sgraph::RayCaster(modelview, ray, objects);
+
+            // raycaster descends down the scenegraph to find the closest intersection and sets HitRecord
+            scenegraph->getRoot()->accept(raycaster);
+
+            raytracer::HitRecord hit = raycaster->getHitRecord();
+
+            // TODO:
+            // based on all intersections encountered (or none), calculate the color for this pixel
+            glm::vec4 pixelColor = calculatePixelColor(hit);
+
+            // add pixelColor to vector of all pixel colors
+            imageColors.push_back(pixelColor);
+        }
+    }
+
+    // export vector of image pixel colors into PPM image
+    PPMImageExporter exporter = PPMImageExporter();
+    exporter.exportToPPM(w, h, imageColors);
+}
+
+/////////////////////////////////
+///*
+glm::vec4 View::calcLight(util::Light light, raytracer::HitRecord hit)
+{
+
+    glm::vec4 fullfPosition = hit.getIntersection();
+    glm::vec3 fPosition = glm::vec3(fullfPosition.x, fullfPosition.y, fullfPosition.z);
+    glm::vec4 fullLightPos = light.getPosition();
+    glm::vec3 lightPos = glm::vec3(fullLightPos.x, fullLightPos.y, fullLightPos.z);
+
+    glm::vec3 lightVec, viewVec, reflectVec;
+    glm::vec3 normalView;
+    glm::vec3 ambient, diffuse, specular;
+
+    glm::vec3 norm = hit.getNormal(); //
+    util::Material mat = hit.getMaterial();
+    glm::vec4 fullMatAmbient = mat.getAmbient();
+    glm::vec4 fullMatDiffuse = mat.getDiffuse();
+    glm::vec4 fullMatSpecular = mat.getSpecular();
+    float matShininess = mat.getShininess();
+
+    float nDotL, rDotV;
+
+    if (fullLightPos.w != 0)
+        lightVec = normalize(lightPos - fPosition);
+    else
+        lightVec = normalize(-lightPos);
+    normalView = normalize(norm);
+    nDotL = glm::dot(normalView, lightVec);
+    viewVec = -fPosition;
+    viewVec = normalize(viewVec);
+    reflectVec = reflect(-lightVec, normalView);
+    reflectVec = normalize(reflectVec);
+    rDotV = max(glm::dot(reflectVec, viewVec), 0.0f);
+    ambient = glm::vec3(fullMatAmbient.x, fullMatAmbient.y, fullMatAmbient.z) * light.getAmbient();
+    diffuse = glm::vec3(fullMatDiffuse.x, fullMatDiffuse.y, fullMatDiffuse.z) * light.getDiffuse() * max(nDotL, 0.0f);
+    if (nDotL > 0)
+        specular = glm::vec3(fullMatSpecular.x, fullMatSpecular.y, fullMatSpecular.z) *
+                   light.getSpecular() *
+                   pow(rDotV, matShininess);
+    else
+        specular = glm::vec3(0, 0, 0);
+
+    // cout << "amb: " << ambient << " diff: " << diffuse << " spec: " << specular << endl;
+    return glm::vec4(ambient + diffuse + specular, 1.0);
+}
+
+glm::vec4 View::calculatePixelColor(raytracer::HitRecord hit)
+{
+    glm::vec4 fColor = glm::vec4(0, 0, 0, 1); // set default bgColor
+    float hitT = hit.getT();
+
+    if (hitT == INFINITY)
+    {
+        // return default bgColor
+        return fColor;
+    }
+    else
+    {
+        // cout << "hitT is not inf! calculatePixelColor in calculating color w/ lights!" << endl;
+        // cout << "starting pixelColor: " << fColor << endl;
+        // calculate and return color for current HitRecord
+        float dDotMinusL;
+
+        glm::vec4 fullfPosition = hit.getIntersection();
+        glm::vec3 fPosition = glm::vec3(fullfPosition.x, fullfPosition.y, fullfPosition.z);
+        glm::vec3 norm = hit.getNormal(); //
+
+        // cout << "intersection position in view sys: " << fullfPosition << endl;
+        // cout << "intersection position in view sys: " << fPosition << endl;
+        // cout << "normal of intersection point in view sys: " << norm << endl;
+
+        for (int i = 0; i < lights.size(); i++)
+        {
+            if (lights[i].getIsSpotlight())
+            {
+                glm::vec4 fullSpotDir = lights[i].getSpotDirection();
+                glm::vec3 spotDir = glm::vec3(fullSpotDir.x, fullSpotDir.y, fullSpotDir.z);
+                glm::vec4 fullLightPos = lights[i].getPosition();
+                glm::vec3 lightPos = glm::vec3(fullLightPos.x, fullLightPos.y, fullLightPos.z);
+
+                glm::vec3 l = normalize(lightPos - fPosition);
+                dDotMinusL = glm::dot(normalize(spotDir), -l);
+                if (dDotMinusL > cos(glm::radians(lights[i].getSpotCutoff())))
+                {
+                    glm::vec4 color = calcLight(lights[i], hit);
+                    fColor = fColor + color;
+                }
+            }
+            else
+            {
+                fColor = fColor + calcLight(lights[i], hit);
+            }
+        }
+        // cout << "final fColor: " << fColor << endl;
+    }
+    // fColor = fColor * texture(image, fTexCoord.st); // TODO: uncomment for texture implementation
+    // fColor = vec4(fTexCoord.s,fTexCoord.t,0,1);
+
+    return glm::vec4(min(int(fColor.x * 255), 255), min(int(fColor.y * 255), 255), min(int(fColor.z * 255), 255), 1);
+}
+
 void View::display(sgraph::IScenegraph *scenegraph)
 {
-    printf("in view display now\n");
+    // printf("in view display now\n");
     program.enable();
-    // glClearColor(0, 0, 0, 1);
-    glClearColor(1, 1, 1, 1);
+    glClearColor(0, 0, 0, 1);
+    // glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
-
-    printf("emptying out modelview\n");
-    // while (!modelview.empty())
-    // {
-    //     modelview.pop();
-    // }
-    printf("finished emptying out modelview\n");
 
     modelview.push(glm::mat4(1.0));
 
@@ -183,7 +327,8 @@ void View::display(sgraph::IScenegraph *scenegraph)
     {
         modelview.top() = modelview.top() *
                           glm::lookAt(glm::vec3(100.0f, 100.0f, 150.0f),
-                                      // glm::lookAt(glm::vec3(0.0f, 0.0f, 150.0f),
+                                      // glm::lookAt(glm::vec3(0.0f, 0.0f, 100.0f),
+                                      //  glm::lookAt(glm::vec3(0.0f, 0.0f, 150.0f),
                                       glm::vec3(0.0f, 0.0f, 0.0f),
                                       personUp);
     }
@@ -199,10 +344,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
     }
     else if (cameraMode == FPS)
     {
-        // glm::vec3 eyePosition = personEyePosition +  glm::vec3(0.0f, 0.0f, 1.0f) * -10.0f;
-        // personEyePosition =  // offset the eye position in the direction the person is facing
         modelview.top() = modelview.top() * glm::lookAt(personEyePosition, personDirection, personUp);
-        // modelview.push(modelview.top());
         modelview.top() = modelview.top() *
                           glm::rotate(glm::mat4(1.0), glm::radians(left), glm::vec3(0.0f, 1.0f, 0.0f)) *
                           glm::rotate(glm::mat4(1.0), glm::radians(up), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -215,8 +357,9 @@ void View::display(sgraph::IScenegraph *scenegraph)
 
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
+    stack<glm::mat4> modelviewJustCamera = modelview;
+
     // LIGHTS
-    //////////////////////////
     // calculate light positions & spotlight directions
     printf("before light pos calculations\n");
     scenegraph->getRoot()->accept(lightPosCalculator);
@@ -227,6 +370,13 @@ void View::display(sgraph::IScenegraph *scenegraph)
     // get input variables that need to be given to the shader program
     initLightShaderVars();
 
+    if (raytraceEnabled)
+    {
+        int window_width, window_height;
+        glfwGetFramebufferSize(window, &window_width, &window_height);
+        // cout << "in view.display, about to call raytrace w/ modelview.top(): " << modelview.top() << endl;
+        raytrace(scenegraph, 800, 800, modelviewJustCamera);
+    }
     // draw lights
     for (int i = 0; i < lights.size(); i++)
     {
@@ -266,39 +416,11 @@ void View::display(sgraph::IScenegraph *scenegraph)
     double currenttime = glfwGetTime();
     if ((currenttime - time) > 1.0)
     {
-        // printf("Framerate: %2.0f\r", frames / (currenttime - time));
         frames = 0;
         time = currenttime;
     }
 
     lightLocations.clear();
-
-    /*
-    void drawSpotlight(float posX, float posY, float posZ, float dirX, float dirY, float dirZ, float cutoffAngle, float exponent, float r, float g, float b)
-    {
-        glEnable(GL_LIGHTING);
-        glEnable(GL_LIGHT0);
-        GLfloat light_position[] = {posX, posY, posZ, 1.0f};
-        GLfloat light_direction[] = {dirX, dirY, dirZ, 0.0f};
-        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-        glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, light_direction);
-        glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, cutoffAngle);
-        glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, exponent);
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, {r, g, b, 1.0f});
-        glEnable(GL_COLOR_MATERIAL);
-        glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-        glBegin(GL_QUADS);
-        glNormal3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(-50.0f, 0.0f, -50.0f);
-        glVertex3f(-50.0f, 0.0f, 50.0f);
-        glVertex3f(50.0f, 0.0f, 50.0f);
-        glVertex3f(50.0f, 0.0f, -50.0f);
-        glEnd();
-        glDisable(GL_LIGHT0);
-        glDisable(GL_LIGHTING);
-        glDisable(GL_COLOR_MATERIAL);
-    }
-    */
 }
 
 void View::setProjection(int width, int height)
@@ -420,6 +542,7 @@ void View::turnRight()
 
 // document references: https://cgvr.cs.uni-bremen.de/teaching/cg_literatur/lighthouse3d_view_frustum_culling/
 void View::setFrustumVertices()
+
 {
     float fov = 80.0f;
     float nearDist = 0.1f;
@@ -469,37 +592,9 @@ void View::setFrustumVertices()
     mesh.setPrimitiveSize(2);
 
     frustum_meshes.push_back(mesh);
+}
 
-    // if (cameraMode == GLOBAL) {
-    //     personEyePosition = glm::vec3(100.0f, 120.0f, 150.0f);
-    //     personDirection = glm::vec3(0.0f, 0.0f, 0.0f);
-    // } else if (cameraMode == CHOPPER) {
-    //     personEyePosition = glm::vec3(100.0f * sin(glm::radians(20.0f)), 200.0f, 100.0f * cos(glm::radians(20.0f)));
-    //     personDirection = glm::vec3(50.0f, 100.0f, 10.0f);
-    // }
-
-    // float tanFOV = tan(glm::radians(fov / 2.0f));
-    // // near
-    // float nearHeight = 2.0f * tanFOV * nearDist;
-    // float nearWidth = nearHeight * aspectRatio;
-
-    // // far
-    // float farHeight = 2.0f * tanFOV * farDist;
-    // float farWidth = farHeight * aspectRatio;
-
-    // glm::vec3 right = glm::normalize(glm::cross(personDirection, personUp));
-    // glm::vec3 camera_up = glm::normalize(glm::cross(right, personDirection));
-
-    // glm::vec3 fc = personEyePosition + personDirection * farDist;
-    // glm::vec3 nc = personEyePosition + personDirection * nearDist;
-
-    // glm::vec3 ftl = fc + (camera_up * farHeight/4.0f) + (right * farWidth/4.0f);
-    // glm::vec3 ftr = fc + (camera_up * farHeight/4.0f) + (right * farWidth/4.0f);
-    // glm::vec3 fbl = fc - (camera_up * farHeight/4.0f) - (right * farWidth/4.0f);
-    // glm::vec3 fbr = fc - (camera_up * farHeight/4.0f) + (right * farWidth/4.0f);
-
-    // glm::vec3 ntl = nc + (camera_up * nearHeight/4.0f) - (right * nearWidth/4.0f);
-    // glm::vec3 ntr = nc + (camera_up * nearHeight/4.0f) + (right * nearWidth/4.0f);
-    // glm::vec3 nbl = nc - (camera_up * nearHeight/4.0f) - (right * nearWidth/4.0f);
-    // glm::vec3 nbr = nc - (camera_up * nearHeight/4.0f) + (right * nearWidth/4.0f);
+void View::toggleRaytraceMode()
+{
+    raytraceEnabled = !raytraceEnabled;
 }

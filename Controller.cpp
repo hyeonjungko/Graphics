@@ -70,7 +70,15 @@ void Controller::run()
 void Controller::onkey(int key, int scancode, int action, int mods)
 {
 
-    if (key == GLFW_KEY_R && action == GLFW_PRESS)
+    if (key == GLFW_KEY_C && action == GLFW_PRESS)
+    {
+        view.toggleRaytraceMode();
+    }
+    else if (key == GLFW_KEY_C && action == GLFW_RELEASE)
+    {
+        view.toggleRaytraceMode();
+    }
+    else if (key == GLFW_KEY_R && action == GLFW_PRESS)
     {
         view.resetTrackBall();
     }
