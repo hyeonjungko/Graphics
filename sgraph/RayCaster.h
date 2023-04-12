@@ -36,7 +36,7 @@ namespace sgraph
         RayCaster(stack<glm::mat4> mv, raytracer::Ray r, map<string, util::ObjectInstance *> &os) : objects(os), ray(r), modelview(mv)
         {
             hit = raytracer::HitRecord();
-            cout << "in RayCaster(), modelview.top(): " << modelview.top() << endl;
+            // cout << "in RayCaster(), modelview.top(): " << modelview.top() << endl;
         }
         ~RayCaster()
         {
@@ -66,8 +66,8 @@ namespace sgraph
             float b = 2 * glm::dot(rayDir, orig);
             float c = orig.x * orig.x + orig.y * orig.y + orig.z * orig.z - 1; // 1 because radius^2 is 1
 
-            cout << "in sphereIntersect, rayDir: " << rayDir << " rayOrig: " << orig << endl;
-            cout << "in sphereIntersect, a: " << a << " b: " << b << " c: " << c << endl;
+            // cout << "in sphereIntersect, rayDir: " << rayDir << " rayOrig: " << orig << endl;
+            // cout << "in sphereIntersect, a: " << a << " b: " << b << " c: " << c << endl;
 
             float discr = b * b - 4 * a * c;
 
@@ -176,9 +176,10 @@ namespace sgraph
             float t;
             glm::vec4 orig = glm::inverse(modelview.top()) * ray.getOrigin(); // ray origin position now in object coordinate system
             glm::vec4 rayDir = glm::inverse(modelview.top()) * ray.getDir();  // ray direction now in object coordinate system
+            // cout << "RAYDIR AFTER INV " << rayDir << endl;
 
-            cout << "in visitLeafNode, rayDir: " << rayDir << " rayOrig: " << orig << endl;
-            cout << "in visitLeafNode, modelview.top(): " << modelview.top() << endl;
+            // cout << "in visitLeafNode, rayDir: " << rayDir << " rayOrig: " << orig << endl;
+            // cout << "in visitLeafNode, modelview.top(): " << modelview.top() << endl;
 
             bool objIsSphere = leafNode->getInstanceOf() == "sphere";
             bool objIsBox = leafNode->getInstanceOf() == "box";
@@ -186,6 +187,7 @@ namespace sgraph
             if ((objIsSphere && sphereIntersect(orig, rayDir, t)) ||
                 (objIsBox && boxIntersect(orig, rayDir, t)))
             {
+                cout << "raycaster found intersection" << endl;
                 float currHitT = hit.getT();
                 if (currHitT == INFINITY || t < currHitT)
                 {
@@ -254,8 +256,8 @@ namespace sgraph
             }
             else
             {
-                cout << "in else " << hit.getT() << endl;
-                // no intersection, no updates on hitRecord
+                // cout << "in else " << hit.getT() << endl;
+                //  no intersection, no updates on hitRecord
             }
         }
 

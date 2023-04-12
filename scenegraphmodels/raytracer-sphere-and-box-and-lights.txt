@@ -1,0 +1,34 @@
+instance sphere models/sphere.obj
+instance box models/box-outside.obj
+
+#material
+material mat-node
+emission 0 0 0
+ambient 1 0 0
+diffuse 1 0 0
+specular 1 0 0
+shininess 0
+end-material
+
+#the root
+group node-1-0 root
+
+translate translate-sphere translate-sphere 18 -18 0
+scale scale-sphere scale 30 30 30
+leaf sphere-leaf sphere instanceof sphere 
+
+translate translate-box translate-box -18 -18 0
+scale scale-box scale 30 30 30
+leaf box-leaf box instanceof box 
+
+# assign material to leaf nodes
+assign-material sphere-leaf mat-node
+assign-material box-leaf mat-node
+
+add-child sphere-leaf scale-sphere
+add-child box-leaf scale-box
+add-child scale-sphere translate-sphere
+add-child scale-box translate-box
+add-child translate-sphere node-1-0
+add-child translate-box node-1-0
+assign-root node-1-0

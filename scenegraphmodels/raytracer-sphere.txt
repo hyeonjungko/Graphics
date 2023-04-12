@@ -1,12 +1,20 @@
 instance sphere models/sphere.obj
 
+#light1
+light light1
+position 0 0 0
+ambient 0.9 0.9 0.9
+diffuse 0.9 0.9 0.9
+specular 0.9 0.9 0.9
+end-light
+
 #material
 material mat-node-3-0
 emission 0 0 0
-ambient 1 0 0
-diffuse 1 0 0
-specular 1 0 0
-shininess 0
+ambient 1 0.2 0
+diffuse 1 0.5 0
+specular 1 0 0.5
+shininess 30
 end-material
 
 #the root
@@ -18,4 +26,5 @@ leaf node-3-0 one-box instanceof sphere
 assign-material node-3-0 mat-node-3-0
 add-child node-3-0 node-2-0
 add-child node-2-0 node-1-0
+attach-light node-1-0 light1
 assign-root node-1-0

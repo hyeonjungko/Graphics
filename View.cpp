@@ -171,15 +171,15 @@ void View::raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::ma
     // write the returned color to array
 
     // output image buffer
-    vector<glm::vec3> imageColors;
+    vector<glm::vec4> imageColors;
 
     float imageAspectRatio = (float)w / h;
     float fov = 100.0f;
 
     // for every pixel (i,j)
-    for (int i = 0; i < w; i++)
+    for (int j = 0; j < h; j++)
     {
-        for (int j = 0; j < h; j++)
+        for (int i = 0; i < w; i++)
         {
             // calculate ray direction w.r.t. current pixel (i,j)
             glm::vec4 rayDirection = glm::vec4(i - 0.5 * w, j - 0.5 * h, -(0.5 * h) / tan(glm::radians(fov / 2)), 0);
@@ -198,7 +198,7 @@ void View::raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::ma
 
             // TODO:
             // based on all intersections encountered (or none), calculate the color for this pixel
-            glm::vec3 pixelColor = calculatePixelColor(hit);
+            glm::vec4 pixelColor = calculatePixelColor(hit);
 
             // add pixelColor to vector of all pixel colors
             imageColors.push_back(pixelColor);
@@ -212,22 +212,129 @@ void View::raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::ma
     exporter.exportToPPM(w, h, imageColors);
 }
 
-glm::vec3 View::calculatePixelColor(raytracer::HitRecord hit)
+/////////////////////////////////
+///*
+glm::vec4 View::calcLight(util::Light light, raytracer::HitRecord hit)
+{
+
+    glm::vec4 fullfPosition = hit.getIntersection();
+    glm::vec3 fPosition = glm::vec3(fullfPosition.x, fullfPosition.y, fullfPosition.z);
+    glm::vec4 fullLightPos = light.getPosition();
+    glm::vec3 lightPos = glm::vec3(fullLightPos.x, fullLightPos.y, fullLightPos.z);
+
+    glm::vec3 lightVec, viewVec, reflectVec;
+    glm::vec3 normalView;
+    glm::vec3 ambient, diffuse, specular;
+
+    glm::vec3 norm = hit.getNormal(); //
+    util::Material mat = hit.getMaterial();
+    glm::vec4 fullMatAmbient = mat.getAmbient();
+    glm::vec4 fullMatDiffuse = mat.getDiffuse();
+    glm::vec4 fullMatSpecular = mat.getSpecular();
+    float matShininess = mat.getShininess();
+
+    float nDotL, rDotV;
+
+    if (fullLightPos.w != 0)
+        lightVec = normalize(lightPos - fPosition);
+    else
+        lightVec = normalize(-lightPos);
+    normalView = normalize(norm);
+    nDotL = glm::dot(normalView, lightVec);
+    viewVec = -fPosition;
+    viewVec = normalize(viewVec);
+    reflectVec = reflect(-lightVec, normalView);
+    reflectVec = normalize(reflectVec);
+    rDotV = max(glm::dot(reflectVec, viewVec), 0.0f);
+    ambient = glm::vec3(fullMatAmbient.x, fullMatAmbient.y, fullMatAmbient.z) * light.getAmbient();
+    diffuse = glm::vec3(fullMatDiffuse.x, fullMatDiffuse.y, fullMatDiffuse.z) * light.getDiffuse() * max(nDotL, 0.0f);
+    if (nDotL > 0)
+        specular = glm::vec3(fullMatSpecular.x, fullMatSpecular.y, fullMatSpecular.z) *
+                   light.getSpecular() *
+                   pow(rDotV, matShininess);
+    else
+        specular = glm::vec3(0, 0, 0);
+
+    cout << "amb: " << ambient << " diff: " << diffuse << " spec: " << specular << endl;
+    return glm::vec4(ambient + diffuse + specular, 1.0);
+}
+
+glm::vec4 View::calculatePixelColor(raytracer::HitRecord hit)
+{
+    glm::vec4 fColor = glm::vec4(0, 0, 0, 1); // set default bgColor
+    // glm::vec4 fColor = glm::vec4(235, 155, 52, 1); // set default bgColor
+    float hitT = hit.getT();
+
+    if (hitT == INFINITY)
+    {
+        // return default bgColor
+        return fColor;
+    }
+    else
+    {
+        cout << "hitT is not inf! calculatePixelColor in calculating color w/ lights!" << endl;
+        cout << "starting pixelColor: " << fColor << endl;
+        // calculate and return color for current HitRecord
+        float dDotMinusL;
+
+        glm::vec4 fullfPosition = hit.getIntersection();
+        glm::vec3 fPosition = glm::vec3(fullfPosition.x, fullfPosition.y, fullfPosition.z);
+        glm::vec3 norm = hit.getNormal(); //
+
+        cout << "intersection position in view sys: " << fullfPosition << endl;
+        cout << "intersection position in view sys: " << fPosition << endl;
+        cout << "normal of intersection point in view sys: " << norm << endl;
+
+        for (int i = 0; i < lights.size(); i++)
+        {
+            cout << "lightss " << i << endl;
+            if (lights[i].getIsSpotlight())
+            {
+                glm::vec4 fullSpotDir = lights[i].getSpotDirection();
+                glm::vec3 spotDir = glm::vec3(fullSpotDir.x, fullSpotDir.y, fullSpotDir.z);
+                glm::vec4 fullLightPos = lights[i].getPosition();
+                glm::vec3 lightPos = glm::vec3(fullLightPos.x, fullLightPos.y, fullLightPos.z);
+
+                glm::vec3 l = normalize(lightPos - fPosition);
+                dDotMinusL = glm::dot(normalize(spotDir), -l);
+                if (dDotMinusL > cos(glm::radians(lights[i].getSpotCutoff())))
+                {
+                    glm::vec4 color = calcLight(lights[i], hit);
+                    fColor = fColor + color;
+                }
+            }
+            else
+            {
+                fColor = fColor + calcLight(lights[i], hit);
+            }
+        }
+        cout << "final fColor: " << fColor << endl;
+    }
+    // fColor = fColor * texture(image, fTexCoord.st); // TODO: uncomment for texture implementation
+    // fColor = vec4(fTexCoord.s,fTexCoord.t,0,1);
+
+    return glm::vec4(int(fColor.x * 255), int(fColor.y * 255), int(fColor.z * 255), 1);
+}
+//*/
+/////////////////////////////////
+/**
+glm::vec4 View::calculatePixelColor(raytracer::HitRecord hit)
 {
     // TODO: calculate pixel color based on given HitRecord and view's LightLocations
     float hitT = hit.getT();
     if (hitT == INFINITY)
     {
         // return default bgColor
-        return glm::vec3(0, 0, 0);
+        return glm::vec4(0, 0, 0, 1);
     }
     else
     {
         // TODO: calculate and return color for current HitRecord
         //
-        return glm::vec3(255, 255, 255);
+        return glm::vec4(255, 255, 255, 1);
     }
 }
+*/
 
 void View::display(sgraph::IScenegraph *scenegraph)
 {
@@ -292,7 +399,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
         int window_width, window_height;
         glfwGetFramebufferSize(window, &window_width, &window_height);
         // TODO: Q: because this happens after light position calculations, the modelview is all
-        cout << "in view.display, about to call raytrace w/ modelview.top(): " << modelview.top() << endl;
+        // cout << "in view.display, about to call raytrace w/ modelview.top(): " << modelview.top() << endl;
         raytrace(scenegraph, 300, 300, modelviewJustCamera); // TODO: Q: are the width and height the window width & height?
     }
     // draw lights

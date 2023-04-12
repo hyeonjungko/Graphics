@@ -47,7 +47,8 @@ public:
     // void init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib>> &meshes);
     void init(Callbacks *callbacks, Model &model);
     void display(sgraph::IScenegraph *scenegraph);
-    glm::vec3 calculatePixelColor(raytracer::HitRecord hit);
+    glm::vec4 calculatePixelColor(raytracer::HitRecord hit);
+    glm::vec4 calcLight(util::Light light, raytracer::HitRecord hit);
     void raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::mat4> modelview);
     void setProjection(int width, int height);
     tuple<float, float> getCurrentMousePositions();
