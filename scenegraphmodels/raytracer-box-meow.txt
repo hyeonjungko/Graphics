@@ -15,7 +15,7 @@ position 0 0 80
 ambient 0 0.9 0.8
 diffuse 0 0.9 0.8
 specular 0 0.9 0.8
-spot-angle 23.0
+spot-angle 35.0
 spot-direction 0 0 -1
 end-light
 
@@ -23,8 +23,8 @@ end-light
 material mat-node-3-0
 emission 0 0 0
 ambient 0.3 0.3 0.3
-diffuse 0.7 0.7 0.7
-specular 0.7 0.7 0.7
+diffuse 0 0 0
+specular 0 0 0
 shininess 100
 end-material
 
@@ -37,7 +37,7 @@ leaf node-3-0 one-box instanceof box
 assign-material node-3-0 mat-node-3-0
 add-child node-3-0 node-2-0
 add-child node-2-0 node-1-0
-attach-light node-1-0 light1
+#attach-light node-1-0 light1
 attach-light node-1-0 light2
 assign-root node-1-0
 

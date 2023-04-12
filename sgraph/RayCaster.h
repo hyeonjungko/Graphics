@@ -208,29 +208,30 @@ namespace sgraph
                     {
                         float nx, ny, nz;
 
-                        if (roundToTenth(hitPosInObj.x) == 0.5)
+                        //  abs(x - 0.5) < 0.001 e.g.
+                        if (abs(hitPosInObj.x - 0.5) < 0.001)
                         {
                             nx = 1;
                         }
-                        else if (roundToTenth(hitPosInObj.x) == -0.5)
+                        else if (abs(hitPosInObj.x + 0.5) < 0.001)
                         {
                             nx = -1;
                         }
 
-                        if (roundToTenth(hitPosInObj.y) == 0.5)
+                        if (abs(hitPosInObj.y - 0.5) < 0.001)
                         {
                             ny = 1;
                         }
-                        else if (roundToTenth(hitPosInObj.y) == -0.5)
+                        else if (abs(hitPosInObj.y + 0.5) < 0.001)
                         {
                             ny = -1;
                         }
 
-                        if (roundToTenth(hitPosInObj.z) == 0.5)
+                        if (abs(hitPosInObj.z - 0.5) < 0.001)
                         {
                             nz = 1;
                         }
-                        else if (roundToTenth(hitPosInObj.z) == -0.5)
+                        else if (abs(hitPosInObj.z + 0.5) < 0.001)
                         {
                             nz = -1;
                         }

@@ -29,21 +29,21 @@ material mat-building
 ambient 0.8 0 0.8
 diffuse 0.8 0 0.8
 specular 0.8 0 0.8
-shininess 10
+shininess 100
 end-material
 
 material mat-building-2
 ambient 0.8 0 0.8
 diffuse 0.8 0 0.8
 specular 0.8 0 0.8
-shininess 10
+shininess 100
 end-material
 
 material mat-base
-ambient 0.8 0 0.8
-diffuse 0.8 0 0.8
-specular 0.8 0 0.8
-shininess 10
+ambient 0.3 0.3 0.3
+diffuse 0.7 0.7 0.7
+specular 0.7 0.7 0.7
+shininess 100
 end-material
 
 group main-root main-root
