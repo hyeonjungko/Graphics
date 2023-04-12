@@ -200,7 +200,6 @@ namespace sgraph
 
                     if (objIsSphere)
                     {
-
                         normInObj = normalize(hitPosInObj); // sphere center at (0,0,0) so no subtraction
                         // TODO: implement textures
                         // texturePos =
@@ -209,29 +208,29 @@ namespace sgraph
                     {
                         float nx, ny, nz;
 
-                        if (hitPosInObj.x == 0.5)
+                        if (roundToTenth(hitPosInObj.x) == 0.5)
                         {
                             nx = 1;
                         }
-                        else if (hitPosInObj.x == -0.5)
+                        else if (roundToTenth(hitPosInObj.x) == -0.5)
                         {
                             nx = -1;
                         }
 
-                        if (hitPosInObj.y == 0.5)
+                        if (roundToTenth(hitPosInObj.y) == 0.5)
                         {
                             ny = 1;
                         }
-                        else if (hitPosInObj.y == -0.5)
+                        else if (roundToTenth(hitPosInObj.y) == -0.5)
                         {
                             ny = -1;
                         }
 
-                        if (hitPosInObj.z == 0.5)
+                        if (roundToTenth(hitPosInObj.z) == 0.5)
                         {
                             nz = 1;
                         }
-                        else if (hitPosInObj.z == -0.5)
+                        else if (roundToTenth(hitPosInObj.z) == -0.5)
                         {
                             nz = -1;
                         }
@@ -239,7 +238,11 @@ namespace sgraph
                         normInObj = glm::vec4(nx, ny, nz, 0);
                     }
 
+                    cout << "hitPosInObj " << hitPosInObj << endl;
+                    cout << "normInObj " << normInObj << endl;
+                    cout << "glm::inverse(glm::transpose((modelview.top()))) " << glm::inverse(glm::transpose((modelview.top()))) << endl;
                     normInView = normalize(glm::inverse(glm::transpose((modelview.top()))) * normInObj);
+                    cout << "normInView " << normInView << endl;
 
                     // set HitRecord in view coordinate system
                     hit.setT(t);
@@ -290,6 +293,11 @@ namespace sgraph
         void visitRotateTransform(RotateTransform *rotateNode)
         {
             visitTransformNode(rotateNode);
+        }
+
+        float roundToTenth(float val)
+        {
+            return float(int(val * 10 + 0.5)) / 10;
         }
 
     private:

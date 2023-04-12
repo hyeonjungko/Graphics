@@ -177,7 +177,7 @@ void View::raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::ma
     float fov = 100.0f;
 
     // for every pixel (i,j)
-    for (int j = 0; j < h; j++)
+    for (int j = h - 1; j >= 0; j--)
     {
         for (int i = 0; i < w; i++)
         {
@@ -262,7 +262,6 @@ glm::vec4 View::calcLight(util::Light light, raytracer::HitRecord hit)
 glm::vec4 View::calculatePixelColor(raytracer::HitRecord hit)
 {
     glm::vec4 fColor = glm::vec4(0, 0, 0, 1); // set default bgColor
-    // glm::vec4 fColor = glm::vec4(235, 155, 52, 1); // set default bgColor
     float hitT = hit.getT();
 
     if (hitT == INFINITY)
@@ -313,35 +312,15 @@ glm::vec4 View::calculatePixelColor(raytracer::HitRecord hit)
     // fColor = fColor * texture(image, fTexCoord.st); // TODO: uncomment for texture implementation
     // fColor = vec4(fTexCoord.s,fTexCoord.t,0,1);
 
-    return glm::vec4(int(fColor.x * 255), int(fColor.y * 255), int(fColor.z * 255), 1);
+    return glm::vec4(min(int(fColor.x * 255), 255), min(int(fColor.y * 255), 255), min(int(fColor.z * 255), 255), 1);
 }
-//*/
-/////////////////////////////////
-/**
-glm::vec4 View::calculatePixelColor(raytracer::HitRecord hit)
-{
-    // TODO: calculate pixel color based on given HitRecord and view's LightLocations
-    float hitT = hit.getT();
-    if (hitT == INFINITY)
-    {
-        // return default bgColor
-        return glm::vec4(0, 0, 0, 1);
-    }
-    else
-    {
-        // TODO: calculate and return color for current HitRecord
-        //
-        return glm::vec4(255, 255, 255, 1);
-    }
-}
-*/
 
 void View::display(sgraph::IScenegraph *scenegraph)
 {
     printf("in view display now\n");
     program.enable();
-    // glClearColor(0, 0, 0, 1);
-    glClearColor(1, 1, 1, 1); // TODO: probably change this while testing raytracing
+    glClearColor(0, 0, 0, 1);
+    // glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
@@ -350,9 +329,9 @@ void View::display(sgraph::IScenegraph *scenegraph)
     if (cameraMode == GLOBAL)
     {
         modelview.top() = modelview.top() *
-                          // glm::lookAt(glm::vec3(100.0f, 100.0f, 150.0f),
-                          glm::lookAt(glm::vec3(0.0f, 0.0f, 100.0f),
-                                      // glm::lookAt(glm::vec3(0.0f, 0.0f, 150.0f),
+                          glm::lookAt(glm::vec3(100.0f, 100.0f, 150.0f),
+                                      // glm::lookAt(glm::vec3(0.0f, 0.0f, 100.0f),
+                                      //  glm::lookAt(glm::vec3(0.0f, 0.0f, 150.0f),
                                       glm::vec3(0.0f, 0.0f, 0.0f),
                                       personUp);
     }
@@ -400,7 +379,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
         glfwGetFramebufferSize(window, &window_width, &window_height);
         // TODO: Q: because this happens after light position calculations, the modelview is all
         // cout << "in view.display, about to call raytrace w/ modelview.top(): " << modelview.top() << endl;
-        raytrace(scenegraph, 300, 300, modelviewJustCamera); // TODO: Q: are the width and height the window width & height?
+        raytrace(scenegraph, 800, 800, modelviewJustCamera); // TODO: Q: are the width and height the window width & height?
     }
     // draw lights
     for (int i = 0; i < lights.size(); i++)

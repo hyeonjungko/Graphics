@@ -22,7 +22,7 @@ struct LightProperties
 
 in vec3 fNormal;
 in vec4 fPosition;
-in vec4 fTexCoord;
+in vec4 fTexCoord; //
 
 const int MAXLIGHTS = 10;
 
@@ -85,7 +85,7 @@ void main()
             fColor = fColor + calcLight(light[i]);       
         }
     }
+    // fColor = vec4(fTexCoord.s,fTexCoord.t,0,1); //
     //fColor = texture(image,fTexCoord.st);
     // fColor = fColor * texture(image,fTexCoord.st);
-    fColor = vec4(fTexCoord.s,fTexCoord.t,0,1);
 }

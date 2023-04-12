@@ -1,4 +1,5 @@
-instance sphere models/sphere.obj
+#all the instances
+instance box models/box-outside.obj
 
 #light1
 light light1
@@ -10,12 +11,12 @@ end-light
 
 #light2
 light light2
-position 0 80 0
+position 0 0 80
 ambient 0 0.9 0.8
 diffuse 0 0.9 0.8
 specular 0 0.9 0.8
 spot-angle 23.0
-spot-direction 0 -1 0
+spot-direction 0 0 -1
 end-light
 
 #material
@@ -30,11 +31,13 @@ end-material
 #the root
 group node-1-0 root
 scale node-2-0 scale 70 70 70
-leaf node-3-0 one-box instanceof sphere 
+leaf node-3-0 one-box instanceof box 
 
 
 assign-material node-3-0 mat-node-3-0
 add-child node-3-0 node-2-0
 add-child node-2-0 node-1-0
 attach-light node-1-0 light1
+attach-light node-1-0 light2
 assign-root node-1-0
+

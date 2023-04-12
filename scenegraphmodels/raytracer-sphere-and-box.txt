@@ -1,13 +1,31 @@
 instance sphere models/sphere.obj
 instance box models/box-outside.obj
 
+#light1
+light light1
+position 0 35 0
+ambient 0.9 0.9 0.9
+diffuse 0.9 0.9 0.9
+specular 0.9 0.9 0.9
+end-light
+
+#light2
+light light2
+position 0 0 80
+ambient 0 0.9 0.8
+diffuse 0 0.9 0.8
+specular 0 0.9 0.8
+spot-angle 23.0
+spot-direction 0 0 -1
+end-light
+
 #material
 material mat-node
 emission 0 0 0
-ambient 1 0 0
-diffuse 1 0 0
-specular 1 0 0
-shininess 0
+ambient 0.3 0.3 0.3
+diffuse 0.7 0.7 0.7
+specular 0.7 0.7 0.7
+shininess 100
 end-material
 
 #the root
@@ -31,4 +49,5 @@ add-child scale-sphere translate-sphere
 add-child scale-box translate-box
 add-child translate-sphere node-1-0
 add-child translate-box node-1-0
+attach-light node-1-0 light1
 assign-root node-1-0

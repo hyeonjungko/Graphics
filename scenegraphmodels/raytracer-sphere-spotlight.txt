@@ -10,12 +10,12 @@ end-light
 
 #light2
 light light2
-position 0 80 0
+position 0 0 80
 ambient 0 0.9 0.8
 diffuse 0 0.9 0.8
 specular 0 0.9 0.8
 spot-angle 23.0
-spot-direction 0 -1 0
+spot-direction 0 0 -1
 end-light
 
 #material
@@ -37,4 +37,5 @@ assign-material node-3-0 mat-node-3-0
 add-child node-3-0 node-2-0
 add-child node-2-0 node-1-0
 attach-light node-1-0 light1
+attach-light node-1-0 light2
 assign-root node-1-0
