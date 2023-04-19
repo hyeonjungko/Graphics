@@ -49,6 +49,7 @@ public:
     void display(sgraph::IScenegraph *scenegraph);
     glm::vec4 calculatePixelColor(raytracer::HitRecord hit);
     glm::vec4 calcLight(util::Light light, raytracer::HitRecord hit);
+    glm::vec4 shade(raytracer::HitRecord hit, util::Light light);
     void raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::mat4> modelview);
     void setProjection(int width, int height);
     tuple<float, float> getCurrentMousePositions();

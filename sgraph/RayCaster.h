@@ -184,6 +184,9 @@ namespace sgraph
             bool objIsSphere = leafNode->getInstanceOf() == "sphere";
             bool objIsBox = leafNode->getInstanceOf() == "box";
 
+            // get textureObject of leafNode
+            util::TextureImage *textureObject = leafNode->getTexture();
+
             if ((objIsSphere && sphereIntersect(orig, rayDir, t)) ||
                 (objIsBox && boxIntersect(orig, rayDir, t)))
             {
@@ -191,6 +194,7 @@ namespace sgraph
                 float currHitT = hit.getT();
                 if (currHitT == INFINITY || t < currHitT)
                 {
+                    glm::vec2 texCoordInObj, texCoordInView;
                     glm::vec4 hitPosInObj, normInObj;
                     glm::vec4 hitPosInView, normInView;
 
@@ -201,8 +205,10 @@ namespace sgraph
                     if (objIsSphere)
                     {
                         normInObj = normalize(hitPosInObj); // sphere center at (0,0,0) so no subtraction
-                        // TODO: implement textures
-                        // texturePos =
+
+                        // calculate texture coordinates for sphere in object coordinate system
+                        texCoordInObj.x = (1 + atan2(normInObj.z, normInObj.x) / M_PI) * 0.5;
+                        texCoordInObj.y = acosf(normInObj.y) / M_PI;
                     }
                     else if (objIsBox)
                     {
@@ -237,6 +243,9 @@ namespace sgraph
                         }
 
                         normInObj = glm::vec4(nx, ny, nz, 0);
+
+                        // TODO:
+                        // calculate texture coordinates in object coordinate system
                     }
 
                     cout << "hitPosInObj " << hitPosInObj << endl;
@@ -250,7 +259,7 @@ namespace sgraph
                     hit.setIntersection(hitPosInView.x, hitPosInView.y, hitPosInView.z);
                     hit.setNormal(normInView);
                     hit.setMaterial(mat);
-                    // hit.setTextureImage(const util::TextureImage &texture); // TODO:
+                    // hit.setTextureName(const string textureName); // TODO:
                     cout << "found new closer intersection " << hit.getT() << endl;
                 }
                 else

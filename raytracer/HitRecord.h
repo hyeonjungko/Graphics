@@ -24,29 +24,40 @@ namespace raytracer
         HitRecord()
         {
             t = INFINITY;
+            textureName = "white";
         }
         inline float getT() const;
         inline glm::vec4 getIntersection() const;
         inline glm::vec3 getNormal() const;
         inline util::Material getMaterial() const;
-        inline util::TextureImage getTexture() const;
+        inline string getTextureName() const;
+        inline glm::vec2 getTextCoord() const;
 
         inline void setT(float time);
+        inline void setTextCoord(const glm::vec2 &texCoord);
         inline void setIntersection(float x, float y, float z);
         inline void setNormal(float x, float y, float z);
         inline void setNormal(const glm::vec3 &norm);
         inline void setMaterial(const util::Material &mat);
-        inline void setTextureImage(const util::TextureImage &texture);
+        inline void setTextureName(const string textureName);
 
     private:
         float t;
         glm::vec4 intersection;
         glm::vec3 normal;
         util::Material material;
-        util::TextureImage texture;
-        // TODO: need to add Texture coordinates
+        string textureName;
+        glm::vec2 texcoord;
     };
 
+    string HitRecord::getTextureName() const
+    {
+        return textureName;
+    }
+    glm::vec2 HitRecord::getTextCoord() const
+    {
+        return glm::vec2(texcoord);
+    }
     float HitRecord::getT() const
     {
         return t;
@@ -63,13 +74,13 @@ namespace raytracer
     {
         return material;
     }
-    util::TextureImage HitRecord::getTexture() const
-    {
-        return texture;
-    }
     void HitRecord::setT(float time)
     {
         t = time;
+    }
+    void HitRecord::setTextCoord(const glm::vec2 &texCoord)
+    {
+        texcoord = glm::vec2(texCoord);
     }
     void HitRecord::setIntersection(float x, float y, float z)
     {
@@ -87,9 +98,9 @@ namespace raytracer
     {
         material = mat;
     }
-    void HitRecord::setTextureImage(const util::TextureImage &textureImage)
+    void HitRecord::setTextureName(const string textureImageName)
     {
-        texture = textureImage;
+        textureName = textureImageName;
     }
 }
 #endif
