@@ -32,6 +32,7 @@ namespace raytracer
         inline util::Material getMaterial() const;
         inline string getTextureName() const;
         inline glm::vec2 getTextCoord() const;
+        inline glm::vec4 getTextColor() const;
 
         inline void setT(float time);
         inline void setTextCoord(const glm::vec2 &texCoord);
@@ -40,6 +41,7 @@ namespace raytracer
         inline void setNormal(const glm::vec3 &norm);
         inline void setMaterial(const util::Material &mat);
         inline void setTextureName(const string textureName);
+        inline void setTextureColor(const glm::vec4 &textureColor);
 
     private:
         float t;
@@ -48,8 +50,13 @@ namespace raytracer
         util::Material material;
         string textureName;
         glm::vec2 texcoord;
+        glm::vec4 texColor;
     };
 
+    glm::vec4 HitRecord::getTextColor() const
+    {
+        return glm::vec4(texColor);
+    }
     string HitRecord::getTextureName() const
     {
         return textureName;
@@ -78,6 +85,12 @@ namespace raytracer
     {
         t = time;
     }
+
+    void HitRecord::setTextureColor(const glm::vec4 &textureColor)
+    {
+        texColor = glm::vec4(textureColor);
+    }
+
     void HitRecord::setTextCoord(const glm::vec2 &texCoord)
     {
         texcoord = glm::vec2(texCoord);

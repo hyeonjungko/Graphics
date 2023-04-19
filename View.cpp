@@ -340,8 +340,10 @@ glm::vec4 View::shade(raytracer::HitRecord hit, util::Light light)
         }
     }
 
-    // TODO: multiply texture color with fColor so far
-    // fColor = fColor * texture(image, fTexCoord.st);
+    cout << "fColor: " << hit.getTextColor() << endl;
+    cout << "texture color: " << hit.getTextColor() << endl;
+    // multiply texture color with fColor so far
+    fColor = fColor * hit.getTextColor();
 
     return fColor;
 }
