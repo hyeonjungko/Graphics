@@ -211,6 +211,14 @@ void View::raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::ma
 
 /////////////////////////////////
 ///*
+glm::vec4 View::calcLightAmbientOnly(util::Light light, raytracer::HitRecord hit)
+{
+    util::Material mat = hit.getMaterial();
+    glm::vec4 fullMatAmbient = mat.getAmbient();
+    glm::vec3 ambient = glm::vec3(fullMatAmbient.x, fullMatAmbient.y, fullMatAmbient.z) * light.getAmbient();
+    return glm::vec4(ambient, 1.0);
+}
+
 glm::vec4 View::calcLight(util::Light light, raytracer::HitRecord hit)
 {
 
@@ -273,53 +281,74 @@ glm::vec4 View::calculatePixelColor(raytracer::HitRecord hit)
     {
         for (int i = 0; i < lights.size(); i++)
         {
-            // TODO: calculate shadow color
-            // if (point is not in shadow for this light) { do the light colors calculations}
-            fColor = shade(hit, lights[i]);
+            fColor = fColor + shade(hit, lights[i]);
         }
         cout << "final fColor: " << fColor << endl;
     }
-    // fColor = fColor * texture(image, fTexCoord.st); // TODO: uncomment for texture implementation
-    // fColor = vec4(fTexCoord.s,fTexCoord.t,0,1);
 
     return glm::vec4(min(int(fColor.x * 255), 255), min(int(fColor.y * 255), 255), min(int(fColor.z * 255), 255), 1);
 }
 
 glm::vec4 View::shade(raytracer::HitRecord hit, util::Light light)
 {
+    // calculate and return color for current HitRecord
     float dDotMinusL;
+    glm::vec4 fullfPosition = hit.getIntersection();
+    glm::vec4 fullLightPos = light.getPosition();
     glm::vec4 fColor = glm::vec4(0, 0, 0, 1);
     cout << "hitT is not inf! calculatePixelColor in calculating color w/ lights!" << endl;
     cout << "starting pixelColor: " << fColor << endl;
-    // calculate and return color for current HitRecord
 
-    if (light.getIsSpotlight())
+    // 1. create a shadow ray using unnormalized direction from intersection pos to light pos
+    glm::vec4 unnormalizedL = glm::vec4(fullLightPos - fullfPosition);
+    raytracer::Ray shadowRay = raytracer::Ray(fullfPosition, unnormalizedL);
+
+    // 2. initialize raycaster for this shadow ray
+    sgraph::RayCaster *shadowRaycaster = new sgraph::RayCaster(modelview, shadowRay, objects);
+
+    // 3. raycaster descends down the scenegraph to find the closest intersection and sets HitRecord
+    this->scenegraph->getRoot()->accept(shadowRaycaster);
+    raytracer::HitRecord shadowHit = shadowRaycaster->getHitRecord();
+
+    // 4. skip this light(return just ambient) if shadowHit is before where the light is (t between 0 & 1)
+    if (shadowHit.getT() > 0 && shadowHit.getT() < 1)
     {
-        glm::vec4 fullfPosition = hit.getIntersection();
-        glm::vec3 fPosition = glm::vec3(fullfPosition.x, fullfPosition.y, fullfPosition.z);
-        glm::vec3 norm = hit.getNormal(); //
-
-        glm::vec4 fullSpotDir = light.getSpotDirection();
-        glm::vec3 spotDir = glm::vec3(fullSpotDir.x, fullSpotDir.y, fullSpotDir.z);
-        glm::vec4 fullLightPos = light.getPosition();
-        glm::vec3 lightPos = glm::vec3(fullLightPos.x, fullLightPos.y, fullLightPos.z);
-
-        glm::vec3 l = normalize(lightPos - fPosition);
-        dDotMinusL = glm::dot(normalize(spotDir), -l);
-        if (dDotMinusL > cos(glm::radians(light.getSpotCutoff())))
-        {
-            fColor = fColor + calcLight(light, hit);
-        }
+        fColor = calcLightAmbientOnly(light, hit);
     }
     else
     {
-        fColor = fColor + calcLight(light, hit);
+        // perform entire light color calculations
+        if (light.getIsSpotlight())
+        {
+            glm::vec3 fPosition = glm::vec3(fullfPosition.x, fullfPosition.y, fullfPosition.z);
+            glm::vec3 norm = hit.getNormal(); //
+
+            glm::vec4 fullSpotDir = light.getSpotDirection();
+            glm::vec3 spotDir = glm::vec3(fullSpotDir.x, fullSpotDir.y, fullSpotDir.z);
+            glm::vec3 lightPos = glm::vec3(fullLightPos.x, fullLightPos.y, fullLightPos.z);
+
+            glm::vec3 l = normalize(lightPos - fPosition);
+            dDotMinusL = glm::dot(normalize(spotDir), -l);
+            if (dDotMinusL > cos(glm::radians(light.getSpotCutoff())))
+            {
+                fColor = calcLight(light, hit);
+            }
+        }
+        else
+        {
+            fColor = calcLight(light, hit);
+        }
     }
+
+    // TODO: multiply texture color with fColor so far
+    // fColor = fColor * texture(image, fTexCoord.st);
+
     return fColor;
 }
 
 void View::display(sgraph::IScenegraph *scenegraph)
 {
+    this->scenegraph = scenegraph;
     // printf("in view display now\n");
     program.enable();
     glClearColor(0, 0, 0, 1);

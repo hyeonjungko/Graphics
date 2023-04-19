@@ -49,6 +49,7 @@ public:
     void display(sgraph::IScenegraph *scenegraph);
     glm::vec4 calculatePixelColor(raytracer::HitRecord hit);
     glm::vec4 calcLight(util::Light light, raytracer::HitRecord hit);
+    glm::vec4 calcLightAmbientOnly(util::Light light, raytracer::HitRecord hit);
     glm::vec4 shade(raytracer::HitRecord hit, util::Light light);
     void raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::mat4> modelview);
     void setProjection(int width, int height);
@@ -76,6 +77,7 @@ private:
     util::ShaderProgram program;
     util::ShaderLocationsVault shaderLocations;
     map<string, util::ObjectInstance *> objects;
+    sgraph::IScenegraph *scenegraph;
     vector<util::Light> lights;
     vector<LightLocation> lightLocations;
     glm::mat4 projection;
