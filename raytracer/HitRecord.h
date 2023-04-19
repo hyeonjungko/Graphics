@@ -25,6 +25,7 @@ namespace raytracer
         {
             t = INFINITY;
             textureName = "white";
+            texColor = glm::vec4(1, 1, 1, 1);
         }
         inline float getT() const;
         inline glm::vec4 getIntersection() const;

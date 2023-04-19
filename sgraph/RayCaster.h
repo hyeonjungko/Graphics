@@ -109,7 +109,7 @@ namespace sgraph
             }
             // found t
             t = t0;
-            cout << "in sphereIntersect, found t: " << t << endl;
+            // cout << "in sphereIntersect, found t: " << t << endl;
             return true;
         }
         /**
@@ -187,7 +187,7 @@ namespace sgraph
             if ((objIsSphere && sphereIntersect(orig, rayDir, t)) ||
                 (objIsBox && boxIntersect(orig, rayDir, t)))
             {
-                cout << "raycaster found intersection" << endl;
+                // cout << "raycaster found intersection" << endl;
                 float currHitT = hit.getT();
                 if (currHitT == INFINITY || t < currHitT)
                 {
@@ -201,14 +201,17 @@ namespace sgraph
 
                     if (objIsSphere)
                     {
+                        // cout << "object is a sphere!" << endl;
                         normInObj = normalize(hitPosInObj); // sphere center at (0,0,0) so no subtraction
 
                         // calculate texture coordinates for sphere in object coordinate system
-                        texCoordInObj.x = (1 + atan2(normInObj.z, normInObj.x) / M_PI) * 0.5;
-                        texCoordInObj.y = acosf(normInObj.y) / M_PI;
+                        // texCoordInObj.x = (M_PI + atan2(-normInObj.z, normInObj.x) / M_PI) * 0.5;   +PI, /(2*PI)
+                        texCoordInObj.x = (M_PI + atan2(-normInObj.z, normInObj.x) / (2 * M_PI)) + -0.1;
+                        texCoordInObj.y = (asinf(normInObj.y) + 0.5 * M_PI) / M_PI; // + 0.5*PI, /PI
                     }
                     else if (objIsBox)
                     {
+                        // cout << "object is a box!" << endl;
                         float nx, ny, nz;
 
                         if (abs(hitPosInObj.x - 0.5) < 0.001)
@@ -240,32 +243,36 @@ namespace sgraph
 
                         normInObj = glm::vec4(nx, ny, nz, 0);
 
-                        // TODO: Q: how to?
-                        // calculate texture coordinates for box in object coordinate system
+                        // setting default texCoordObj for boxes
+                        texCoordInObj.x = 0.5;
+                        texCoordInObj.y = 0.5;
                     }
 
-                    // TODO: Q: do I need to convert texture coordinates into view coordinate system before adding them to HitRecord?
-                    // If so, how?
-                    cout << "hitPosInObj " << hitPosInObj << endl;
-                    cout << "normInObj " << normInObj << endl;
-                    // cout << "texCoordInObj " << texCoordInObj << endl;
-                    cout << "glm::inverse(glm::transpose((modelview.top()))) " << glm::inverse(glm::transpose((modelview.top()))) << endl;
+                    // cout << "hitPosInObj " << hitPosInObj << endl;
+                    // cout << "normInObj " << normInObj << endl;
+                    //  cout << "texCoordInObj " << texCoordInObj << endl;
+                    // cout << "glm::inverse(glm::transpose((modelview.top()))) " << glm::inverse(glm::transpose((modelview.top()))) << endl;
                     normInView = normalize(glm::inverse(glm::transpose((modelview.top()))) * normInObj);
-                    cout << "normInView " << normInView << endl;
+                    // cout << "normInView " << normInView << endl;
 
                     // get textureObject of leafNode
                     util::TextureImage *textureObject = leafNode->getTexture();
-                    glm::vec4 texColor = textureObject->getColor(texCoordInObj.x, texCoordInObj.y); // TODO: Q: should this be in view
+                    glm::vec4 texColor = textureObject->getColor(texCoordInObj.x, texCoordInObj.y);
+                    if (objIsBox)
+                    {
+                        cout << "texColor before 255 update: " << texColor << endl;
+                        cout << "its a box, t: " << t << endl;
+                    }
                     glm::vec4 texColorr = glm::vec4(texColor.x / 255, texColor.y / 255, texColor.z / 255, 1);
-                    cout << "setting texColor to Hit: " << texColorr << endl;
-                    // set HitRecord in view coordinate system
+                    // cout << "setting texColorr to Hit: " << texColorr << endl;
+                    //  set HitRecord in view coordinate system
                     hit.setT(t);
                     hit.setIntersection(hitPosInView.x, hitPosInView.y, hitPosInView.z);
                     hit.setNormal(normInView);
                     hit.setMaterial(mat);
                     hit.setTextureColor(texColorr);
-                    hit.setTextCoord(texCoordInView); // TODO: probably don't need this anymore as texColor is already found here
-                    cout << "found new closer intersection " << hit.getT() << endl;
+                    hit.setTextCoord(texCoordInView);
+                    // cout << "found new closer intersection " << hit.getT() << endl;
                 }
                 else
                 {

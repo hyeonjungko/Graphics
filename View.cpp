@@ -12,6 +12,7 @@ using namespace std;
 #include "raytracer/HitRecord.h"
 #include "sgraph/RayCaster.h"
 #include "PPMImageExporter.h"
+#include <glm/gtx/norm.hpp>
 // #include "VertexAttrib.h"
 
 #include "glm/gtx/string_cast.hpp" // added just for printing
@@ -195,7 +196,6 @@ void View::raytrace(sgraph::IScenegraph *scenegraph, int w, int h, stack<glm::ma
             scenegraph->getRoot()->accept(raycaster);
             raytracer::HitRecord hit = raycaster->getHitRecord();
 
-            // TODO:
             // based on all intersections encountered (or none), calculate the color for this pixel
             glm::vec4 pixelColor = calculatePixelColor(hit);
 
@@ -296,12 +296,16 @@ glm::vec4 View::shade(raytracer::HitRecord hit, util::Light light)
     glm::vec4 fullfPosition = hit.getIntersection();
     glm::vec4 fullLightPos = light.getPosition();
     glm::vec4 fColor = glm::vec4(0, 0, 0, 1);
-    cout << "hitT is not inf! calculatePixelColor in calculating color w/ lights!" << endl;
-    cout << "starting pixelColor: " << fColor << endl;
+    // cout << "hitT is not inf! calculatePixelColor in calculating color w/ lights!" << endl;
+    // cout << "starting pixelColor: " << fColor << endl;
 
     // 1. create a shadow ray using unnormalized direction from intersection pos to light pos
     glm::vec4 unnormalizedL = glm::vec4(fullLightPos - fullfPosition);
-    raytracer::Ray shadowRay = raytracer::Ray(fullfPosition, unnormalizedL);
+    glm::vec4 s = fullfPosition + unnormalizedL * 0.01f / length2(unnormalizedL); // fudge shadow ray
+    raytracer::Ray shadowRay = raytracer::Ray(s, unnormalizedL);
+
+    cout << "\n\nCALCULATING SHADOW RAY NOW\n\n"
+         << endl;
 
     // 2. initialize raycaster for this shadow ray
     sgraph::RayCaster *shadowRaycaster = new sgraph::RayCaster(modelview, shadowRay, objects);
@@ -311,13 +315,19 @@ glm::vec4 View::shade(raytracer::HitRecord hit, util::Light light)
     raytracer::HitRecord shadowHit = shadowRaycaster->getHitRecord();
 
     // 4. skip this light(return just ambient) if shadowHit is before where the light is (t between 0 & 1)
-    if (shadowHit.getT() > 0 && shadowHit.getT() < 1)
+    float shadowHitT = shadowHit.getT();
+    std::cout << "shadowHit: " << shadowHitT << endl;
+    if (shadowHitT > 0 && shadowHitT < 1)
     {
+        // std::cout << "shadowHit b/t 0 & 1: " << shadowHitT << endl;
+        std::cout << "calculating only ambient" << endl;
         fColor = calcLightAmbientOnly(light, hit);
     }
     else
     {
-        // perform entire light color calculations
+        // std::cout << "shadowHit NOT b/t 0 & 1: " << shadowHitT << endl;
+        std::cout << "calculating ambient, diffuse, & spec" << endl;
+        //  perform entire light color calculations
         if (light.getIsSpotlight())
         {
             glm::vec3 fPosition = glm::vec3(fullfPosition.x, fullfPosition.y, fullfPosition.z);
@@ -340,9 +350,9 @@ glm::vec4 View::shade(raytracer::HitRecord hit, util::Light light)
         }
     }
 
-    cout << "fColor: " << hit.getTextColor() << endl;
-    cout << "texture color: " << hit.getTextColor() << endl;
-    // multiply texture color with fColor so far
+    std::cout << "fColor end of shade(): " << hit.getTextColor() << endl;
+    // std::cout << "texture color: " << hit.getTextColor() << endl;
+    //  multiply texture color with fColor so far
     fColor = fColor * hit.getTextColor();
 
     return fColor;
@@ -398,11 +408,11 @@ void View::display(sgraph::IScenegraph *scenegraph)
 
     // LIGHTS
     // calculate light positions & spotlight directions
-    printf("before light pos calculations\n");
+    // printf("before light pos calculations\n");
     scenegraph->getRoot()->accept(lightPosCalculator);
-    printf("after light pos calculations\n");
+    // printf("after light pos calculations\n");
     lights = lightPosCalculator->getScenegraphLights();
-    printf("now there are %i lights in View\n", lights.size());
+    // printf("now there are %i lights in View\n", lights.size());
 
     // get input variables that need to be given to the shader program
     initLightShaderVars();
@@ -417,14 +427,14 @@ void View::display(sgraph::IScenegraph *scenegraph)
     // draw lights
     for (int i = 0; i < lights.size(); i++)
     {
-        printf("\ngot here\n");
+        // printf("\ngot here\n");
         glm::vec4 pos = lights[i].getPosition();
-        cout << "fetched light pos: " << pos << endl;
+        // cout << "fetched light pos: " << pos << endl;
         cout << lightLocations.size() << endl;
 
         glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
     }
-    printf("\nalso got here\n");
+    // printf("\nalso got here\n");
 
     // pass light color properties to shader
     glUniform1i(shaderLocations.getLocation("numLights"), lights.size());

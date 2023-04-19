@@ -105,9 +105,9 @@ namespace sgraph
             glUniform3fv(shaderLocations.getLocation("material.diffuse"), 1, glm::value_ptr(leafNode->getMaterial().getDiffuse()));
             glUniform3fv(shaderLocations.getLocation("material.specular"), 1, glm::value_ptr(leafNode->getMaterial().getSpecular()));
             glUniform1f(shaderLocations.getLocation("material.shininess"), leafNode->getMaterial().getShininess());
-            cout << "mat ambient" << leafNode->getMaterial().getAmbient() << endl;
-            cout << "mat diffuse" << leafNode->getMaterial().getDiffuse() << endl;
-            cout << "mat spec" << leafNode->getMaterial().getSpecular() << endl;
+            // cout << "mat ambient" << leafNode->getMaterial().getAmbient() << endl;
+            // cout << "mat diffuse" << leafNode->getMaterial().getDiffuse() << endl;
+            // cout << "mat spec" << leafNode->getMaterial().getSpecular() << endl;
 
             objects[leafNode->getInstanceOf()]->draw();
         }
