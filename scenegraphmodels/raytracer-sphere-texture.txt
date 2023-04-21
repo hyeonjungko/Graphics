@@ -40,4 +40,6 @@ attach-light node-1-0 light1
 assign-root node-1-0
 
 texture-image earthmap textures/earthmap.ppm
+texture-image checkerboard textures/checkerboard.ppm
 assign-texture node-3-0 earthmap
+#assign-texture node-3-0 checkerboard

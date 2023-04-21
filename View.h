@@ -47,7 +47,9 @@ public:
     // void init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib>> &meshes);
     void init(Callbacks *callbacks, Model &model);
     void display(sgraph::IScenegraph *scenegraph);
-    glm::vec4 calculatePixelColor(raytracer::HitRecord hit);
+    glm::vec4 getPixelColor(raytracer::Ray ray, int maxBounces);
+    glm::vec4 calcReflect(raytracer::HitRecord hit, raytracer::Ray ray, int maxBounces);
+    glm::vec4 shadeAll(raytracer::HitRecord hit);
     glm::vec4 calcLight(util::Light light, raytracer::HitRecord hit);
     glm::vec4 calcLightAmbientOnly(util::Light light, raytracer::HitRecord hit);
     glm::vec4 shade(raytracer::HitRecord hit, util::Light light);
@@ -94,6 +96,8 @@ private:
     float up;
     float aspectRatio;
     bool raytraceEnabled;
+    int MAX_BOUNCE;
+    int currBounceCount;
 
     vector<util::PolygonMesh<VertexAttrib>> frustum_meshes;
     vector<util::ObjectInstance *> frustum_objects;

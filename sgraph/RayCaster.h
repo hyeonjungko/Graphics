@@ -167,6 +167,7 @@ namespace sgraph
 
         void visitLeafNode(LeafNode *leafNode)
         {
+
             // for object in LeafNode,
             // calculate if there is an intersection between the object & this caster's ray
 
@@ -176,10 +177,6 @@ namespace sgraph
             float t;
             glm::vec4 orig = glm::inverse(modelview.top()) * ray.getOrigin(); // ray origin position now in object coordinate system
             glm::vec4 rayDir = glm::inverse(modelview.top()) * ray.getDir();  // ray direction now in object coordinate system
-            // cout << "RAYDIR AFTER INV " << rayDir << endl;
-
-            // cout << "in visitLeafNode, rayDir: " << rayDir << " rayOrig: " << orig << endl;
-            // cout << "in visitLeafNode, modelview.top(): " << modelview.top() << endl;
 
             bool objIsSphere = leafNode->getInstanceOf() == "sphere";
             bool objIsBox = leafNode->getInstanceOf() == "box";
@@ -201,13 +198,11 @@ namespace sgraph
 
                     if (objIsSphere)
                     {
-                        // cout << "object is a sphere!" << endl;
                         normInObj = normalize(hitPosInObj); // sphere center at (0,0,0) so no subtraction
 
                         // calculate texture coordinates for sphere in object coordinate system
-                        // texCoordInObj.x = (M_PI + atan2(-normInObj.z, normInObj.x) / M_PI) * 0.5;   +PI, /(2*PI)
                         texCoordInObj.x = (M_PI + atan2(-normInObj.z, normInObj.x) / (2 * M_PI)) + -0.1;
-                        texCoordInObj.y = (asinf(normInObj.y) + 0.5 * M_PI) / M_PI; // + 0.5*PI, /PI
+                        texCoordInObj.y = (asinf(normInObj.y) + 0.5 * M_PI) / M_PI;
                     }
                     else if (objIsBox)
                     {
@@ -248,12 +243,7 @@ namespace sgraph
                         texCoordInObj.y = 0.5;
                     }
 
-                    // cout << "hitPosInObj " << hitPosInObj << endl;
-                    // cout << "normInObj " << normInObj << endl;
-                    //  cout << "texCoordInObj " << texCoordInObj << endl;
-                    // cout << "glm::inverse(glm::transpose((modelview.top()))) " << glm::inverse(glm::transpose((modelview.top()))) << endl;
                     normInView = normalize(glm::inverse(glm::transpose((modelview.top()))) * normInObj);
-                    // cout << "normInView " << normInView << endl;
 
                     // get textureObject of leafNode
                     util::TextureImage *textureObject = leafNode->getTexture();
@@ -264,7 +254,6 @@ namespace sgraph
                         cout << "its a box, t: " << t << endl;
                     }
                     glm::vec4 texColorr = glm::vec4(texColor.x / 255, texColor.y / 255, texColor.z / 255, 1);
-                    // cout << "setting texColorr to Hit: " << texColorr << endl;
                     //  set HitRecord in view coordinate system
                     hit.setT(t);
                     hit.setIntersection(hitPosInView.x, hitPosInView.y, hitPosInView.z);
@@ -272,7 +261,6 @@ namespace sgraph
                     hit.setMaterial(mat);
                     hit.setTextureColor(texColorr);
                     hit.setTextCoord(texCoordInView);
-                    // cout << "found new closer intersection " << hit.getT() << endl;
                 }
                 else
                 {
@@ -281,7 +269,6 @@ namespace sgraph
             }
             else
             {
-                // cout << "in else " << hit.getT() << endl;
                 //  no intersection, no updates on hitRecord
             }
         }
