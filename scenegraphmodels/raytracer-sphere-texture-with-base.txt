@@ -1,0 +1,96 @@
+instance sphere models/sphere.obj
+instance box models/box.obj
+
+#light1
+light light1
+position -10 100 30
+ambient 0.9 0.9 0.9
+diffuse 0.9 0.9 0.9
+specular 0.9 0.9 0.9
+end-light
+
+#light2
+light light2
+position 0 80 0
+ambient 0 0.9 0.8
+diffuse 0 0.9 0.8
+specular 0 0.9 0.8
+spot-angle 23.0
+spot-direction 0 -1 0
+end-light
+
+#light3
+light light3
+position 70 80 30
+ambient 0.9 0.9 0.9
+diffuse 0.9 0.9 0.9
+specular 0.9 0.9 0.9
+end-light
+
+#material
+material mat-abs
+emission 0 0 0
+ambient 0.3 0.3 0.3
+diffuse 0.7 0.7 0.7
+specular 0.7 0.7 0.7
+shininess 100
+absorption 1
+reflection 0 
+transparency 0 
+end-material
+
+material mat-abs-and-ref
+emission 0 0 0
+ambient 0.3 0.3 0.3
+diffuse 0.7 0.7 0.7
+specular 0.7 0.7 0.7
+shininess 90
+absorption 0.6
+reflection 0.4
+transparency 0 
+end-material
+
+#the root
+group node-1-0 root
+scale node-2-0 scale 70 70 70
+leaf node-3-0 one-sphere instanceof sphere 
+
+# base
+translate translate-base translate 0 -80 0
+scale scale-base scale 180 5 180
+leaf leaf-base leaf-base instanceof box
+
+# side wall
+translate translate-side-wall2 translate -150 0 0
+rotate rotate-side-wall rotate -90 0 0 1
+translate translate-side-wall translate 0 50 0
+scale scale-side-wall scale 180 5 180
+leaf leaf-side-wall leaf-side-wall instanceof box
+
+
+# assign materials
+assign-material leaf-side-wall mat-abs-and-ref
+assign-material node-3-0 mat-abs
+assign-material leaf-base mat-abs-and-ref
+
+add-child node-3-0 node-2-0
+add-child node-2-0 node-1-0
+
+# connect base transformations
+add-child leaf-base scale-base
+add-child scale-base translate-base
+add-child translate-base node-1-0
+
+# connect side-wall transformations
+add-child leaf-side-wall scale-side-wall
+add-child scale-side-wall translate-side-wall
+add-child translate-side-wall rotate-side-wall
+add-child rotate-side-wall translate-side-wall2
+add-child translate-side-wall2 node-1-0
+
+attach-light node-1-0 light1
+attach-light node-1-0 light3
+assign-root node-1-0
+
+texture-image earthmap textures/earthmap.ppm
+assign-texture node-3-0 earthmap

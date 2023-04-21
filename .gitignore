@@ -1,6 +1,8 @@
+./.DS_Store
 *.o
 *.md
 !README.md
 Scenegraphs
 .vscode/*
+.VSCodeCounter/*
 textures/abstract.ppm
