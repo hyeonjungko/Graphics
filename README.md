@@ -6,21 +6,18 @@
   make Scenegraphs
   ./Scenegraphs -i scenegraphmodels/{FILENAME}.txt
   ```
-## Implemented & Nonimplemented Features
+## Features
 
-:white_check_mark: Program compiles and runs without errors
+### OpenGL Render
+* object rendering from XML
+* object transformations including translation, scale, and rotation
+* real-time perspective updates during program runs with keyboard and mouse inputs
+* texture mapping from ASCII PPM format images
+* point lights and spotlight implementation
 
-:white_check_mark: Texture mapping works for sphere
-
-:white_check_mark: Shadows appear correctly for multiple lights
-
-:x: Reflection appears correctly on both objects
-
-:white_check_mark: Infinite bouncing is prevented with a suitable parameter
-
-:white_check_mark: An image (`/raytracer_outputs/shadow_800_800.ppm`) showing the final rendering of your ray tracer (at least 800x800)
-
-:white_check_mark: An image (`/raytracer_outputs/shadow_800_800.ppm`) showing that textures work in your ray tracer (a suitable image, or the final rendering)
-
-:white_check_mark: An image (`/raytracer_outputs/shadow_800_800.ppm`) showing that shadows work in your ray tracer (a suitable image, or the final rendering) 
-
+### Raytracer
+* ACSII PPM image output of raytracer upon `c` keyboard press
+* implements all OpenGL capabilities + shadows + reflections
+* shadows allow multiple lights
+* reflections prevent infinite bouncing of the ray
+* example raytracer images in `./raytracer_outputs`
